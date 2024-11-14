@@ -1,6 +1,9 @@
 import GridlockLogo from '../assets/logo-white.png'
 import AppStoreButton from '../assets/app-store.svg'
 import GooglePlayButton from '../assets/google-play.png'
+import Positions from '../assets/positions.png'
+import PhoneScreen from '../assets/league.png'
+import Prizes from '../assets/prizes.png'
 import { useEffect, useState } from 'react';
 
 export const Hero = () => {
@@ -122,57 +125,72 @@ export const Hero = () => {
                     </div>
                 )}
                 <div className="fantasy" style={{ gridColumnStart: 1, gridColumnEnd: 2, gridRowStart: 2, gridRowEnd: 3, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                    <h2 style={{ marginTop: screenWidth > 900 ? 100 : 25, textTransform: 'uppercase', fontSize: screenWidth > 400 ? 36 : 24, fontWeight: 700, position: 'relative' }}>
+                    <h2 style={{ marginTop: screenWidth > 900 ? 100 : screenWidth < 768 ? 175 : 25, textTransform: 'uppercase', fontSize: screenWidth > 400 ? 36 : 24, fontWeight: 700, position: 'relative' }}>
                         <span style={{ position: 'relative', zIndex: 1 }}>FANTASY</span>
                         <span style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5em', color: 'red', zIndex: 2 }}>❌</span>
                     </h2>
                     <p style={{ marginTop: 10, textAlign: 'center', width: '70%' }}>Unlike traditional fantasy apps, Gridlock has no budget limits, no must-pick rules and no limitations. Just choose who you want, where you want them before qualifying starts.</p>
-
                 </div>
             </div>
-            <div className="banner-section" style={{ width: '100%', display: 'grid', gridTemplateColumns: '60% 40%', marginTop: 200 }}>
-                <div className="text-side">
-                    <h2 style={{ paddingLeft: 100, marginTop: 25, marginBottom: 25, fontSize: 36 }}>
+            <div className="banner-section" style={{ width: '100%', display: screenWidth < 768 ? 'flex' : 'grid', gridTemplateColumns: screenWidth > 1265 ? '60% 40%' : screenWidth < 900 ? '40% 60%' : '50% 50%', marginTop: 50, flexDirection: 'column' }}>
+                <div className="text-side" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: screenWidth < 768 ? '80%' : '' }}>
+                    <h2 style={{ paddingLeft: screenWidth < 500 ? 50 : 100, marginTop: 25, marginBottom: 25, fontSize: screenWidth < 500 ? 24 : 36 }}>
                         WIN INCREDIBLE FORMULA 1 PRIZES
                     </h2>
-                    <div className="parallelogram">
-                        <p style={{ paddingLeft: 100, paddingTop: 20, paddingBottom: 20, paddingRight: 20, fontSize: 18, fontWeight: 500 }}>The top 3 of Gridlock 2025 will win a heap of awesome Formula 1 prizes!</p>
+                    <div className="parallelogram" style={{ width: screenWidth > 400 ? '100%' : '75%'}}>
+                        <p style={{ paddingLeft: screenWidth < 500 ? 50 : 100, paddingTop: 20, paddingBottom: 20, paddingRight: 20, fontSize: screenWidth < 500 ? 12 : 18, fontWeight: 500 }}>The top 3 of Gridlock 2025 will win a heap of awesome Formula 1 prizes!</p>
                     </div>
                 </div>
-                <div className="image-side">
-
+                <div className="image-side" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src={Positions} alt="Top 3 Prizes" style={{ width: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250, height: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250 }} />
                 </div>
             </div>
-            <div className="banner-section" style={{ width: '100%', display: 'grid', gridTemplateColumns: '40% 60%', marginTop: 200}}>
-                <div className="image-side">
-
-                </div>
-                <div className="text-side">
-                    <h2 style={{ paddingRight: 100, marginTop: 25, marginBottom: 25, fontSize: 36, textAlign: 'right' }}>
-                        COMPETE AGAINST FRIENDS
-                    </h2>
-                    <div className="parallelogram left">
-                        <p style={{ paddingLeft: 20, paddingTop: 20, paddingBottom: 20, paddingRight: 100, fontSize: 18, fontWeight: 500, textAlign: 'right' }}>Create and join private leagues - prove to your friends that you know the most about Formula 1.</p>
+            {screenWidth < 768 ? (
+                <div className="banner-section" style={{ width: '100%', display: screenWidth < 768 ? 'flex' : 'grid', gridTemplateColumns: screenWidth > 1265 ? '40% 60%' : '50% 50%', marginTop: 50, flexDirection: 'column' }}>
+                    <div className="text-side" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: screenWidth < 768 ? '80%' : '' }}>
+                        <h2 style={{ paddingLeft: screenWidth < 500 ? 50 : 100, marginTop: 25, marginBottom: 25, fontSize: screenWidth < 500 ? 24 : 36 }}>
+                            COMPETE GLOBALLY OR AGAINST FRIENDS
+                        </h2>
+                        <div className="parallelogram" style={{ width: screenWidth > 400 ? '100%' : '75%'}}>
+                            <p style={{ paddingLeft: screenWidth < 500 ? 50 : 100, paddingTop: 20, paddingBottom: 20, paddingRight: 20, fontSize: screenWidth < 500 ? 12 : 18, fontWeight: 500 }}>Create and join private leagues - prove to your friends that you know the most about Formula 1.</p>
+                        </div>
+                    </div>
+                    <div className="image-side" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 25 }}>
+                        <img src={PhoneScreen} alt="Gridlock Screenshot" style={{ width: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250, height: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250 }} />
                     </div>
                 </div>
-            </div>
-            <div className="banner-section" style={{ width: '100%', display: 'grid', gridTemplateColumns: '60% 40%', marginTop: 200, marginBottom: 200 }}>
-                <div className="text-side">
-                    <h2 style={{ paddingLeft: 100, marginTop: 25, marginBottom: 25, fontSize: 36 }}>
+            ) : (
+                <div className="banner-section" style={{ width: '100%', display: screenWidth < 768 ? 'flex' : 'grid', gridTemplateColumns: screenWidth > 1265 ? '40% 60%' : '50% 50%', marginTop: 50, flexDirection: 'column' }}>
+                    <div className="image-side" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={PhoneScreen} alt="Gridlock Screenshot" style={{ width: screenWidth < 1050 ? 350 : 450, height: screenWidth < 1050 ? 350 : 450 }} />
+                    </div>
+                    <div className="text-side" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: screenWidth < 768 ? '80%' : '' }}>
+                        <h2 style={{ paddingRight: 100, marginTop: 25, marginBottom: 25, fontSize: 36, textAlign: 'right' }}>
+                            COMPETE GLOBALLY OR AGAINST FRIENDS
+                        </h2>
+                        <div className="parallelogram left">
+                            <p style={{ paddingLeft: 20, paddingTop: 20, paddingBottom: 20, paddingRight: 100, fontSize: 18, fontWeight: 500, textAlign: 'right' }}>Create and join private leagues - prove to your friends that you know the most about Formula 1.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            <div className="banner-section" style={{ width: '100%', display: screenWidth < 768 ? 'flex' : 'grid', gridTemplateColumns: screenWidth > 1265 ? '60% 40%' : '50% 50%', marginTop: 100, marginBottom: 100, flexDirection: 'column' }}>
+                <div className="text-side" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: screenWidth < 768 ? '80%' : '' }}>
+                    <h2 style={{ paddingLeft: screenWidth < 500 ? 50 : 100, marginTop: 25, marginBottom: 25, fontSize: screenWidth < 500 ? 24 : 36 }}>
                         PRIZES TO BE WON EACH RACE WEEKEND
                     </h2>
-                    <div className="parallelogram">
-                        <p style={{ paddingLeft: 100, paddingTop: 20, paddingBottom: 20, paddingRight: 20, fontSize: 18, fontWeight: 500 }}>On some race weekends prizes will be up for grabs for the best prediction - your chance to win your favourite team’s merch or unique experiences for free!</p>
+                    <div className="parallelogram" style={{ width: screenWidth > 400 ? '100%' : '75%'}}>
+                        <p style={{ paddingLeft: screenWidth < 500 ? 50 : 100, paddingTop: 20, paddingBottom: 20, paddingRight: 20, fontSize: screenWidth < 500 ? 12 : 18, fontWeight: 500 }}>On some race weekends prizes will be up for grabs for the best prediction - your chance to win your favourite team’s merch or unique experiences for free!</p>
                     </div>
                 </div>
-                <div className="image-side">
-
+                <div className="image-side" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img src={Prizes} alt="Prizes available" style={{ width: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250, height: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250 }} />
                 </div>
             </div>
             <footer style={{ width: '100%', backgroundColor: 'rgb(109, 109, 109)', paddingLeft: '10%', paddingRight: '10%', paddingTop: 30, paddingBottom: 30}}>
-                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <div style={{ width: '100%', display: 'flex', flexDirection: screenWidth > 600 ? 'row' : 'column', justifyContent: 'space-between', alignItems: 'center'}}>
                     <img src={GridlockLogo} alt="Gridlock Logo" style={{ width: 100, height: 100 }} />
-                    <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 25 }}>
+                    <nav style={{ display: 'flex', flexDirection: screenWidth > 400 ? 'row' : 'column', alignItems: 'center', justifyContent: 'space-around', gap: 25 }}>
                         <a href="#" style={{ color: 'white'}}>Support</a>
                         <a href="#" style={{ color: 'white'}}>Privacy Policy</a>
                         <a href="#" style={{ color: 'white'}}>Terms Of Use</a>
