@@ -5,10 +5,41 @@ import Positions from '../assets/positions.png'
 import PhoneScreen from '../assets/league.png'
 import Prizes from '../assets/prizes.png'
 import { useEffect, useState } from 'react';
+import { firestore } from '../firebaseConfig'
+import { collection, doc, getDoc, setDoc, updateDoc, increment } from 'firebase/firestore'
 
 export const Hero = () => {
 
     const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+    const [expandedFAQ, setExpandedFAQ] = useState(null);
+
+    const handleFAQClick = (index) => {
+        setExpandedFAQ(expandedFAQ === index ? null : index);
+    };
+
+    useEffect(() => {
+        const currentPath = window.location.pathname;
+
+        if (currentPath === '/join') {
+            const currentYear = new Date().getFullYear();
+            const marketingRef = doc(firestore, `marketingData`, `${currentYear}`);
+            getDoc(marketingRef)
+                .then((docSnapshot) => {
+                    if (docSnapshot.exists()) {
+                        updateDoc(marketingRef, {
+                            usersVisited: increment(1),
+                        });
+                    } else {
+                        setDoc(marketingRef, {
+                            usersVisited: 1,
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error updating Firestore:', error);
+                });
+        }
+    }, []);
 
     useEffect(() => {
         const handleResize = () => setScreenWidth(window.innerWidth);
@@ -88,6 +119,21 @@ export const Hero = () => {
         },
     ]
 
+    const faqs = [
+        {
+            question: "How does Gridlock work?",
+            answer: "Gridlock allows you to predict F1 race results, compete in leagues, and win prizes. Simply submit predictions for each race weekend and track your performance on the leaderboard."
+        },
+        {
+            question: "How to redeem my prize?",
+            answer: "If you've won a prize, you'll receive an email with instructions on how to redeem it. Follow the steps in the email to claim your reward. Make sure to check your junk/spam folder."
+        },
+        {
+            question: "How to delete my account and all associated data?",
+            answer: "You can delete your account in the account section of the app. If this fails, please contact support by emailing us at admin@f1gridlock.com. We'll assist you with the deletion process."
+        }
+    ];
+
     return (
         <section className="hero">
             <div className="hero-background" />
@@ -99,10 +145,10 @@ export const Hero = () => {
                     <h1 style={{ marginTop: screenWidth > 900 ? 100 : 25, textTransform: 'uppercase', fontSize: screenWidth > 400 ? 36 : 24, fontWeight: 700 }}>Predict F1 Races, Compete, And win Prizes.</h1>
                     <p style={{ marginTop: screenWidth < 400 ? 35 : 25, marginBottom: screenWidth < 400 ? 35 : 25 }}>Play with your friends in private leagues, compete against like-minded fans, or predict on a global scale. Everyone is in with a chance of winning weekly prizes on Gridlock.</p>
                     <div className="hero-app-buttons" style={{ display: 'flex', gap: screenWidth < 400 ? 10 : 20, }}>
-                        <a href="https://apps.apple.com/app" target="_blank" rel="noopener noreferrer">
+                        <a href="https://apps.apple.com/gb/app/gridlock-f1-predictions-app/id6736937071" target="_blank" rel="noopener noreferrer">
                             <img src={AppStoreButton} alt="Download on the App Store" style={{ width: screenWidth > 500 ? 150 : screenWidth > 350 ? 125 : 100 }} />
                         </a>
-                        <a href="https://play.google.com/store/apps" target="_blank" rel="noopener noreferrer">
+                        <a href="https://play.google.com/store/apps/details?id=com.gridlock.gridlock&pcampaignid=web_share" target="_blank" rel="noopener noreferrer">
                             <img src={GooglePlayButton} alt="Get it on Google Play" style={{ width: screenWidth > 500 ? 165 : screenWidth > 350 ? 135 : 105 }} />
                         </a>
                     </div>
@@ -187,6 +233,59 @@ export const Hero = () => {
                     <img src={Prizes} alt="Prizes available" style={{ width: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250, height: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250 }} />
                 </div>
             </div>
+            <div style={{ marginBottom: 20 }}>
+                    <h2 style={{ color: 'white', textAlign: 'center' }}>FAQs</h2>
+                    <div style={{ marginTop: 15, width:'50vw' }}>
+                        {faqs.map((faq, index) => (
+                            <div
+                                    key={index}
+                                    style={{
+                                        marginBottom: 15,
+                                        width: '100%',
+                                        border: '1px solid white',
+                                        borderRadius: 15,
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                <button
+                                    onClick={() => handleFAQClick(index)}
+                                    style={{
+                                        width: '100%',
+                                        backgroundColor: 'transparent',
+                                        color: 'white',
+                                        textAlign: 'left',
+                                        fontSize: 18,
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        padding: 10,
+                                        outline: 'none',
+                                        borderRadius: 15,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        transition: 'none',
+                                        border: 'none'
+                                    }}
+                                >
+                                    {faq.question}
+                                    <span style={{ fontSize: 16 }}>
+                                        {expandedFAQ === index ? '▲' : '▼'}
+                                    </span>
+                                </button>
+                                {expandedFAQ === index && (
+                                    <div style={{
+                                        color: 'white',
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        minWidth: '100%'
+                                    }}>
+                                        {faq.answer}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
             <footer style={{ width: '100%', backgroundColor: 'rgb(109, 109, 109)', paddingLeft: '10%', paddingRight: '10%', paddingTop: 30, paddingBottom: 30}}>
                 <div style={{ width: '100%', display: 'flex', flexDirection: screenWidth > 600 ? 'row' : 'column', justifyContent: 'space-between', alignItems: 'center'}}>
                     <img src={GridlockLogo} alt="Gridlock Logo" style={{ width: 100, height: 100 }} />
