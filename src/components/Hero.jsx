@@ -19,7 +19,6 @@ export const Hero = () => {
 
     useEffect(() => {
         const currentPath = window.location.pathname;
-
         if (currentPath === '/join') {
             const currentYear = new Date().getFullYear();
             const marketingRef = doc(firestore, `marketingData`, `${currentYear}`);
