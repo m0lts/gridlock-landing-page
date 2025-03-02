@@ -79,18 +79,17 @@ export const Hero = () => {
             color: '#FF8001'
         },
         {
-            firstName: 'Carlos',
-            secondName: 'Sainz Jr',
-            number: 55,
-            image: 'https://media.api-sports.io/formula-1/drivers/24.png',
-            color: '#E8022D'
+            firstName: 'George',
+            secondName: 'Russell',
+            number: 63,
+            image: "https://media.api-sports.io/formula-1/drivers/51.png",
+            color: '#29F4D2'
         },
         {
-            firstName: 'Lewis',
-            secondName: 'Hamilton',
-            number: 44,
-            image: 'https://media.api-sports.io/formula-1/drivers/20.png',
-            color: '#29F4D2'
+            firstName: 'Select',
+            secondName: 'DRIVER',
+            number: '--',
+            color: '#fff'
         },
         {
             firstName: 'Select',
