@@ -1,16 +1,17 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import { Hero } from './components/Hero'
-import './assets/styles.css'
+import { Hero } from "./components/Hero";
+import { Routes, Route } from "react-router-dom";
+import Payment from "./components/Payment";
+import "./assets/styles.css";
 
 function App() {
-
   return (
     <>
-      <Hero />
+      <Routes>
+        <Route path="/" element={<Hero />} />
+        <Route path="/payment" element={<Payment />} />
+      </Routes>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
