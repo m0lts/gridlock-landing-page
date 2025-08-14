@@ -15,6 +15,12 @@ export default function Payment() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  const handleTokenCardClick = (tokenType) => {
+    // Replace this URL with your actual payment/redirect URL
+    const redirectUrl = `https://buy.stripe.com/${tokenType}`;
+    window.open(redirectUrl, "_blank");
+  };
   return (
     <section className="hero">
       <div className="hero-background" />
@@ -169,6 +175,7 @@ export default function Payment() {
                 e.target.style.borderColor = "#fff";
                 e.target.style.backgroundColor = "#1a1a1a";
               }}
+              onClick={() => handleTokenCardClick("28E5kC4U72iU2v60HY4sE00")}
             >
               <div style={{ position: "relative" }}>
                 <img
@@ -241,6 +248,7 @@ export default function Payment() {
                 e.target.style.borderColor = "#ff4757";
                 e.target.style.backgroundColor = "#1a1a1a";
               }}
+              onClick={() => handleTokenCardClick("14A9AScmz0aMglWfCS4sE01")}
             >
               {/* MOST POPULAR Banner */}
               <div
@@ -332,6 +340,7 @@ export default function Payment() {
                 e.target.style.borderColor = "#fff";
                 e.target.style.backgroundColor = "#1a1a1a";
               }}
+              onClick={() => handleTokenCardClick("aFa3cu9an0aMc5G76m4sE02")}
             >
               <div style={{ position: "relative" }}>
                 <img
@@ -404,6 +413,7 @@ export default function Payment() {
                 e.target.style.borderColor = "#ffd700";
                 e.target.style.backgroundColor = "#1a1a1a";
               }}
+              onClick={() => handleTokenCardClick("7sY4gygCP1eQglW1M24sE03")}
             >
               {/* BEST VALUE Banner */}
               <div
