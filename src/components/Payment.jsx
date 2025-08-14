@@ -25,25 +25,6 @@ export default function Payment() {
           style={{ width: 150, height: 150 }}
         />
       </header>
-      {/* <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          width: screenWidth > 900 ? "50%" : "90%",
-          marginTop: 100,
-        }}
-      >
-        <h1 style={{ fontSize: screenWidth > 900 ? 48 : 36, fontWeight: 700 }}>
-          GRIDBRAIN TOKEN
-        </h1>
-        <p style={{ fontSize: 16, fontWeight: 400 }}>
-          GridBrain is the official token of Gridlock. It is used to purchase
-          Gridlock&apos;s services and products.
-        </p>
-      </div> */}
       <div
         className="fantasy"
         style={{
@@ -55,28 +36,34 @@ export default function Payment() {
           flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
+          width: "100%",
+          paddingLeft: screenWidth < 768 ? 20 : 0,
+          paddingRight: screenWidth < 768 ? 20 : 0,
         }}
       >
         <div
           style={{
             display: "flex",
             alignItems: "center",
+            justifyContent: screenWidth > 900 ? "space-between" : "center",
             gap: 20,
-            marginTop: screenWidth > 900 ? 100 : screenWidth < 768 ? 175 : 25,
+            marginTop: screenWidth > 900 ? 100 : screenWidth < 768 ? 25 : 25,
             backgroundColor: "white",
-            padding: 6,
+            padding: 10,
             paddingLeft: 20,
             paddingRight: 20,
             borderRadius: 10,
             marginBottom: 50,
+            width:
+              screenWidth > 900 ? "50%" : screenWidth < 768 ? "100%" : "50%",
           }}
         >
           <img
             src={GridBrainImage}
             alt="GridBrain"
             style={{
-              width: screenWidth > 400 ? 60 : 40,
-              height: screenWidth > 400 ? 60 : 40,
+              width: screenWidth > 900 ? 100 : 60,
+              height: screenWidth > 900 ? 100 : 60,
             }}
           />
           <h2
@@ -94,288 +81,423 @@ export default function Payment() {
             src={TokenImage}
             alt="Token"
             style={{
-              width: screenWidth > 400 ? 60 : 40,
-              height: screenWidth > 400 ? 60 : 40,
+              width: screenWidth > 900 ? 100 : 60,
+              height: screenWidth > 900 ? 100 : 60,
             }}
           />
         </div>
-        <p style={{ marginTop: 10, textAlign: "center", width: "70%" }}>
-          Dive into AI track and car suitability analysis, driver stats, car
-          performance data and track trends, all in one place. Make smarter
-          predictions and climb the leaderboard with insights built for serious
-          F1 fans.
-        </p>
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
+            flexDirection: "column",
             gap: 10,
-            width: screenWidth > 900 ? "50%" : "90%",
-            marginTop: 100,
-          }}
-        >
-          <h1
-            style={{ fontSize: screenWidth > 900 ? 48 : 36, fontWeight: 700 }}
-          >
-            AVAILABLE TOKENS
-          </h1>
-        </div>
-
-        {/* Token Grid */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: screenWidth > 768 ? "repeat(2, 1fr)" : "1fr",
-            gap: 20,
-            width: screenWidth > 900 ? "60%" : "90%",
+            width: screenWidth > 900 ? "50%" : "100%",
             marginTop: 50,
+            borderRadius: 4,
+            padding: 10,
+            paddingLeft: 20,
+            paddingRight: 20,
+            backgroundColor: "rgb(245, 245, 245, 0.1)",
+            backdropFilter: "blur(10px)",
             marginBottom: 50,
           }}
         >
-          {/* 1 TOKEN Card */}
           <div
             style={{
-              backgroundColor: "#1a1a1a",
-              borderRadius: 12,
-              padding: 24,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              gap: 16,
-              border: "1px solid #fff",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              transform: "translateY(0)",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = "translateY(-8px)";
-              e.target.style.boxShadow = "0 20px 40px rgba(100, 108, 255, 0.3)";
-              e.target.style.borderColor = "#C753F8";
-              e.target.style.backgroundColor = "#2a2a2a";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "translateY(0)";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "#fff";
-              e.target.style.backgroundColor = "#1a1a1a";
+              justifyContent: "center",
+              gap: 10,
+              width: screenWidth > 900 ? "100%" : "100%",
+              marginTop: 10,
             }}
           >
-            <div style={{ position: "relative" }}>
-              <img
-                src={Token1}
-                alt="Token"
-                style={{
-                  width: 80,
-                  height: 80,
-                }}
-              />
-            </div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: "white" }}>
-              1 TOKEN
-            </h3>
-            <p style={{ fontSize: 14, color: "white", textAlign: "center" }}>
-              Smash a weekend.
-            </p>
+            <h1
+              style={{ fontSize: screenWidth > 900 ? 48 : 26, fontWeight: 700 }}
+            >
+              OUT-PREDICT EVERYONE
+            </h1>
           </div>
+          <p style={{ marginTop: 10, textAlign: "left" }}>
+            Dive into AI track and car suitability analysis, driver stats, car
+            performance data and track trends, all in one place. Make smarter
+            predictions and climb the leaderboard with insights built for
+            serious F1 fans.
+          </p>
+          {/* Token Grid */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: screenWidth > 900 ? 20 : 10,
+              width:
+                screenWidth > 900 ? "100%" : screenWidth < 768 ? "100%" : "80%",
+              marginTop: 50,
+              marginBottom: 50,
+            }}
+          >
+            {/* 1 TOKEN Card */}
+            <div
+              style={{
+                backgroundColor: "#1a1a1a",
+                borderRadius: 12,
+                padding: screenWidth > 900 ? 16 : 6,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 0,
+                border: "1px solid #fff",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: "translateY(0)",
+                position: "relative",
+                marginBottom: screenWidth < 768 ? 20 : 0,
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-8px)";
+                e.target.style.boxShadow =
+                  "0 20px 40px rgba(100, 108, 255, 0.3)";
+                e.target.style.borderColor = "#C753F8";
+                e.target.style.backgroundColor = "#2a2a2a";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "none";
+                e.target.style.borderColor = "#fff";
+                e.target.style.backgroundColor = "#1a1a1a";
+              }}
+            >
+              <div style={{ position: "relative" }}>
+                <img
+                  src={Token1}
+                  alt="Token"
+                  style={{
+                    width: screenWidth > 900 ? 120 : 80,
+                    height: screenWidth > 900 ? 120 : 80,
+                  }}
+                />
+              </div>
+              <h3
+                style={{
+                  fontSize: screenWidth > 900 ? 34 : 18,
+                  fontWeight: 700,
+                  color: "white",
+                }}
+              >
+                1 TOKEN
+              </h3>
+              <p
+                style={{
+                  fontSize: screenWidth > 900 ? 20 : 12,
+                  color: "white",
+                  textAlign: "center",
+                  margin: 0,
+                }}
+              >
+                Smash a weekend.
+              </p>
+              <div
+                style={{
+                  fontSize: screenWidth > 900 ? 34 : 18,
+                  fontWeight: 700,
+                  color: "white",
+                  marginTop: "auto",
+                  // paddingTop: 10,
+                }}
+              >
+                £0.99
+              </div>
+            </div>
 
-          {/* 6 TOKENS Card */}
-          <div
-            style={{
-              backgroundColor: "#1a1a1a",
-              borderRadius: 12,
-              padding: 24,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-              border: "1px solid #fff",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              transform: "translateY(0)",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = "translateY(-8px)";
-              e.target.style.boxShadow = "0 20px 40px rgba(100, 108, 255, 0.3)";
-              e.target.style.borderColor = "#C753F8";
-              e.target.style.backgroundColor = "#2a2a2a";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "translateY(0)";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "#fff";
-              e.target.style.backgroundColor = "#1a1a1a";
-            }}
-          >
-            <div style={{ position: "relative" }}>
-              <img
-                src={Token6}
-                alt="Token"
+            {/* 6 TOKENS Card - MOST POPULAR */}
+            <div
+              style={{
+                backgroundColor: "#1a1a1a",
+                borderRadius: 12,
+                padding: screenWidth > 900 ? 16 : 6,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 0,
+                border: "2px solid #ff4757",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: "translateY(0)",
+                position: "relative",
+                marginBottom: screenWidth < 768 ? 20 : 0,
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-8px)";
+                e.target.style.boxShadow = "0 20px 40px rgba(255, 71, 87, 0.3)";
+                e.target.style.borderColor = "#ff6b7a";
+                e.target.style.backgroundColor = "#2a2a2a";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "none";
+                e.target.style.borderColor = "#ff4757";
+                e.target.style.backgroundColor = "#1a1a1a";
+              }}
+            >
+              {/* MOST POPULAR Banner */}
+              <div
                 style={{
-                  width: 80,
-                  height: 80,
+                  position: "absolute",
+                  top: -12,
+                  right: 10,
+                  backgroundColor: "#ff4757",
+                  color: "white",
+                  padding: "4px 16px",
+                  borderRadius: 8,
+                  fontSize: screenWidth > 900 ? 12 : 10,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
                 }}
-              />
+              >
+                Most Popular
+              </div>
+              <div style={{ position: "relative", marginTop: 8 }}>
+                <img
+                  src={Token6}
+                  alt="Token"
+                  style={{
+                    width: screenWidth > 900 ? 120 : 80,
+                    height: screenWidth > 900 ? 120 : 80,
+                    // marginTop: screenWidth < 768 ? -10 : 0,
+                  }}
+                />
+              </div>
+              <h3
+                style={{
+                  fontSize: screenWidth > 900 ? 34 : 18,
+                  fontWeight: 700,
+                  color: "white",
+                }}
+              >
+                6 TOKENS
+              </h3>
+              <p
+                style={{
+                  fontSize: screenWidth > 900 ? 20 : 12,
+                  color: "white",
+                  textAlign: "center",
+                  // marginTop: screenWidth < 768 ? -10 : 2,
+                }}
+              >
+                For a Top Prediction streak.
+              </p>
+              <div
+                style={{
+                  fontSize: screenWidth > 900 ? 34 : 18,
+                  fontWeight: 700,
+                  color: "white",
+                  marginTop: "auto",
+                  paddingTop: 16,
+                }}
+              >
+                £4.49
+              </div>
             </div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: "white" }}>
-              6 TOKENS
-            </h3>
-            <p style={{ fontSize: 14, color: "white", textAlign: "center" }}>
-              For a Top Prediction streak.
-            </p>
-          </div>
 
-          {/* 12 TOKENS Card */}
-          <div
-            style={{
-              backgroundColor: "#1a1a1a",
-              borderRadius: 12,
-              padding: 24,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-              border: "1px solid #fff",
-              cursor: "pointer",
-              transition: "all 0.3s ease",
-              transform: "translateY(0)",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = "translateY(-8px)";
-              e.target.style.boxShadow = "0 20px 40px rgba(100, 108, 255, 0.3)";
-              e.target.style.borderColor = "#C753F8";
-              e.target.style.backgroundColor = "#2a2a2a";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "translateY(0)";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "#fff";
-              e.target.style.backgroundColor = "#1a1a1a";
-            }}
-          >
-            <div style={{ position: "relative" }}>
-              <img
-                src={Token12}
-                alt="Token"
+            {/* 12 TOKENS Card */}
+            <div
+              style={{
+                backgroundColor: "#1a1a1a",
+                borderRadius: 12,
+                padding: screenWidth > 900 ? 16 : 6,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 4,
+                border: "1px solid #fff",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: "translateY(0)",
+                position: "relative",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-8px)";
+                e.target.style.boxShadow =
+                  "0 20px 40px rgba(100, 108, 255, 0.3)";
+                e.target.style.borderColor = "#C753F8";
+                e.target.style.backgroundColor = "#2a2a2a";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "none";
+                e.target.style.borderColor = "#fff";
+                e.target.style.backgroundColor = "#1a1a1a";
+              }}
+            >
+              <div style={{ position: "relative" }}>
+                <img
+                  src={Token12}
+                  alt="Token"
+                  style={{
+                    width: screenWidth > 900 ? 120 : 80,
+                    height: screenWidth > 900 ? 120 : 80,
+                  }}
+                />
+              </div>
+              <h3
                 style={{
-                  width: 80,
-                  height: 80,
+                  fontSize: screenWidth > 900 ? 34 : 18,
+                  fontWeight: 700,
+                  color: "white",
+                  margin: 0,
                 }}
-              />
+              >
+                12 TOKENS
+              </h3>
+              <p
+                style={{
+                  fontSize: screenWidth > 900 ? 20 : 12,
+                  color: "white",
+                  textAlign: "center",
+                  margin: 0,
+                }}
+              >
+                Half a season of insight.
+              </p>
+              <div
+                style={{
+                  fontSize: screenWidth > 900 ? 34 : 18,
+                  fontWeight: 700,
+                  color: "white",
+                  marginTop: "auto",
+                  // paddingTop: 16,
+                }}
+              >
+                £7.99
+              </div>
             </div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: "white" }}>
-              12 TOKENS
-            </h3>
-            <p style={{ fontSize: 14, color: "white", textAlign: "center" }}>
-              Half a season of insight.
-            </p>
-          </div>
 
-          {/* 24 TOKENS Card */}
-          <div
+            {/* 24 TOKENS Card - BEST VALUE */}
+            <div
+              style={{
+                backgroundColor: "#1a1a1a",
+                borderRadius: 12,
+                padding: screenWidth > 900 ? 16 : 6,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 4,
+                border: "2px solid #ffd700",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+                transform: "translateY(0)",
+                position: "relative",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = "translateY(-8px)";
+                e.target.style.boxShadow = "0 20px 40px rgba(255, 215, 0, 0.3)";
+                e.target.style.borderColor = "#ffed4e";
+                e.target.style.backgroundColor = "#2a2a2a";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = "translateY(0)";
+                e.target.style.boxShadow = "none";
+                e.target.style.borderColor = "#ffd700";
+                e.target.style.backgroundColor = "#1a1a1a";
+              }}
+            >
+              {/* BEST VALUE Banner */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: -12,
+                  right: 8,
+                  backgroundColor: "#ffd700",
+                  color: "black",
+                  padding: "4px 16px",
+                  borderRadius: 8,
+                  fontSize: screenWidth > 900 ? 12 : 10,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                Best Value
+              </div>
+              <div style={{ position: "relative", marginTop: 8 }}>
+                <img
+                  src={Token24}
+                  alt="Token"
+                  style={{
+                    width: screenWidth > 900 ? 120 : 80,
+                    height: screenWidth > 900 ? 120 : 80,
+                    marginTop: screenWidth < 768 ? -10 : -5,
+                  }}
+                />
+              </div>
+              <h3
+                style={{
+                  fontSize: screenWidth > 900 ? 34 : 18,
+                  fontWeight: 700,
+                  color: "white",
+                  margin: 0,
+                }}
+              >
+                24 TOKENS
+              </h3>
+              <p
+                style={{
+                  fontSize: screenWidth > 900 ? 20 : 12,
+                  color: "white",
+                  textAlign: "center",
+                  margin: 0,
+                }}
+              >
+                One token per race.
+              </p>
+              <div
+                style={{
+                  fontSize: screenWidth > 900 ? 34 : 18,
+                  fontWeight: 700,
+                  color: "white",
+                  marginTop: "auto",
+                  // paddingTop: 16,
+                }}
+              >
+                £13.99
+              </div>
+            </div>
+          </div>
+          {/* Add a button here to go to the payment page */}
+          <button
             style={{
-              backgroundColor: "#1a1a1a",
-              borderRadius: 12,
-              padding: 24,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16,
-              border: "1px solid #fff",
+              backgroundColor: "#e91e63",
+              color: "white",
+              padding: "15px 30px",
+              borderRadius: "6px",
               cursor: "pointer",
               transition: "all 0.3s ease",
               transform: "translateY(0)",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = "translateY(-8px)";
-              e.target.style.boxShadow = "0 20px 40px rgba(100, 108, 255, 0.3)";
-              e.target.style.borderColor = "#C753F8";
-              e.target.style.backgroundColor = "#2a2a2a";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "translateY(0)";
-              e.target.style.boxShadow = "none";
-              e.target.style.borderColor = "#fff";
-              e.target.style.backgroundColor = "#1a1a1a";
+              position: "relative",
+              border: "none",
+              fontSize: "16px",
+              fontWeight: "bold",
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+              boxShadow: "0 4px 15px rgba(233, 30, 99, 0.3)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              fontFamily: "Arial, sans-serif",
+              width: "100%",
+              marginBottom: 50,
             }}
           >
-            <div style={{ position: "relative" }}>
-              <img
-                src={Token24}
-                alt="Token"
-                style={{
-                  width: 80,
-                  height: 80,
-                }}
-              />
-            </div>
-            <h3 style={{ fontSize: 24, fontWeight: 700, color: "white" }}>
-              24 TOKENS
-            </h3>
-            <p style={{ fontSize: 14, color: "white", textAlign: "center" }}>
-              One token per race
-            </p>
-          </div>
+            Use Your Token
+            <span style={{ fontSize: "18px" }}>→</span>
+          </button>
         </div>
       </div>
-      {/* <footer
-        style={{
-          width: "100%",
-          backgroundColor: "rgb(109, 109, 109)",
-          paddingLeft: "10%",
-          paddingRight: "10%",
-          paddingTop: 30,
-          paddingBottom: 30,
-        }}
-      >
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: screenWidth > 600 ? "row" : "column",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <img
-            src={GridlockLogo}
-            alt="Gridlock Logo"
-            style={{ width: 100, height: 100 }}
-          />
-          <nav
-            style={{
-              display: "flex",
-              flexDirection: screenWidth > 400 ? "row" : "column",
-              alignItems: "center",
-              justifyContent: "space-around",
-              gap: 25,
-            }}
-          >
-            <a href="#" style={{ color: "white" }}>
-              Support
-            </a>
-            <a href="#" style={{ color: "white" }}>
-              Privacy Policy
-            </a>
-            <a href="#" style={{ color: "white" }}>
-              Terms Of Use
-            </a>
-            <a href="/payment" style={{ color: "white" }}>
-              Payment
-            </a>
-          </nav>
-        </div>
-        <p style={{ marginTop: 15, marginBottom: 15 }}>
-          This website is unofficial and is not associated in any way with the
-          Formula One group of companies. F1, FORMULA ONE, FORMULA 1, FIA
-          FORMULA ONE WORLD CHAMPIONSHIP, GRAND PRIX and related marks are trade
-          marks of Formula One Licensing B.V. Gridlock is not affiliated with
-          any of the drivers or teams displayed in our applications and such
-          data is for informational purposes only.
-        </p>
-        <h4>&copy; 2024 Company 57 Limited. All rights reserved.</h4>
-      </footer> */}
     </section>
   );
 }
