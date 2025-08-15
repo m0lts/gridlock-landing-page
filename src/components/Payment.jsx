@@ -28,7 +28,7 @@ export default function Payment() {
         <img
           src={GridlockLogo}
           alt="Gridlock Logo"
-          style={{ width: 150, height: 150 }}
+          style={{ width: 140, height: 140 }}
         />
       </header>
       <div
@@ -45,44 +45,47 @@ export default function Payment() {
           width: "100%",
           paddingLeft: screenWidth < 768 ? 20 : 0,
           paddingRight: screenWidth < 768 ? 20 : 0,
+          marginTop: screenWidth < 768 ? -40 : -90,
         }}
       >
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: screenWidth > 900 ? "space-between" : "center",
-            gap: 20,
-            marginTop: screenWidth > 900 ? 100 : screenWidth < 768 ? 25 : 25,
+            justifyContent:
+              screenWidth > 900 ? "space-between" : "space-between",
+            marginTop: screenWidth > 900 ? 80 : screenWidth < 768 ? 25 : 25,
             backgroundColor: "white",
             padding: 10,
-            paddingLeft: 20,
-            paddingRight: 20,
+            paddingLeft: screenWidth < 768 ? 8 : 30,
+            paddingRight: screenWidth < 768 ? 8 : 30,
             borderRadius: 10,
-            marginBottom: 50,
+            marginBottom: screenWidth < 768 ? 4 : 20,
             width:
               screenWidth > 900 ? "50%" : screenWidth < 768 ? "100%" : "50%",
           }}
         >
-          <img
-            src={GridBrainImage}
-            alt="GridBrain"
-            style={{
-              width: screenWidth > 900 ? 100 : 60,
-              height: screenWidth > 900 ? 100 : 60,
-            }}
-          />
-          <h2
-            style={{
-              textTransform: "uppercase",
-              fontSize: screenWidth > 400 ? 36 : 24,
-              fontWeight: 700,
-              position: "relative",
-              color: "black",
-            }}
-          >
-            <span style={{ position: "relative", zIndex: 1 }}>GRIDBRAIN</span>
-          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <img
+              src={GridBrainImage}
+              alt="GridBrain"
+              style={{
+                width: screenWidth > 900 ? 100 : 60,
+                height: screenWidth > 900 ? 100 : 60,
+              }}
+            />
+            <h2
+              style={{
+                textTransform: "uppercase",
+                fontSize: screenWidth > 700 ? 46 : 26,
+                fontWeight: 700,
+                position: "relative",
+                color: "black",
+              }}
+            >
+              <span style={{ position: "relative", zIndex: 1 }}>GRIDBRAIN</span>
+            </h2>
+          </div>
           <img
             src={TokenImage}
             alt="Token"
@@ -478,7 +481,7 @@ export default function Payment() {
             </div>
           </div>
           {/* Add a button here to go to the payment page */}
-          <button
+          {/* <button
             style={{
               backgroundColor: "#e91e63",
               color: "white",
@@ -505,7 +508,7 @@ export default function Payment() {
           >
             Use Your Token
             <span style={{ fontSize: "18px" }}>→</span>
-          </button>
+          </button> */}
         </div>
       </div>
     </section>
