@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import GridlockLogo from "../assets/logo-white.png";
 import GridBrainImage from "../assets/GridBrain.png";
 import TokenImage from "../assets/token.png";
@@ -9,6 +10,8 @@ import Token24 from "../assets/token24.png";
 
 export default function Payment() {
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const [searchParams] = useSearchParams();
+  const userId = searchParams.get("userId");
 
   useEffect(() => {
     const handleResize = () => setScreenWidth(window.innerWidth);
@@ -16,10 +19,41 @@ export default function Payment() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleTokenCardClick = (tokenType) => {
-    // Replace this URL with your actual payment/redirect URL
-    const redirectUrl = `https://buy.stripe.com/${tokenType}`;
-    window.open(redirectUrl, "_blank");
+  const handleTokenCardClick = async (productId) => {
+    const clientReferenceId = encodeURIComponent(userId || "anonymous");
+
+    if (typeof productId === "string" && productId.startsWith("prod_")) {
+      try {
+        const response = await fetch(
+          "https://europe-west2-gridlock-dev-e8594.cloudfunctions.net/createCheckoutSession",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: userId || "anonymous", productId }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const data = await response.json().catch(() => ({}));
+        const checkoutUrl = data.url || data.checkoutUrl || data.stripeUrl;
+
+        if (checkoutUrl) {
+          window.location.href = checkoutUrl;
+        } else {
+          console.error("No checkout URL returned:", data);
+          alert("Unable to start checkout. Please try again.");
+        }
+      } catch (error) {
+        console.error("Failed to create checkout session:", error);
+        alert("Unable to start checkout. Please try again.");
+      }
+    } else {
+      const redirectUrl = `https://buy.stripe.com/${productId}?userid=${clientReferenceId}`;
+      window.open(redirectUrl, "_blank");
+    }
   };
   return (
     <section className="hero">
