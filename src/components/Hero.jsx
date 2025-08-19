@@ -704,7 +704,7 @@ export const Hero = () => {
             <a href="#" style={{ color: "white" }}>
               Terms Of Use
             </a>
-            <a href="/payment" style={{ color: "white" }}>
+            <a href="/payment?userId=anonymous" style={{ color: "white" }}>
               Payment
             </a>
           </nav>
