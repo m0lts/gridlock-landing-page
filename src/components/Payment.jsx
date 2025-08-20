@@ -41,7 +41,8 @@ export default function Payment() {
         const checkoutUrl = data.url || data.checkoutUrl || data.stripeUrl;
 
         if (checkoutUrl) {
-          window.location.href = checkoutUrl;
+          // open checkoutUrl in new tab
+          window.open(checkoutUrl, "_blank");
         } else {
           console.error("No checkout URL returned:", data);
           alert("Unable to start checkout. Please try again.");
@@ -212,7 +213,7 @@ export default function Payment() {
                 e.target.style.borderColor = "#fff";
                 e.target.style.backgroundColor = "#1a1a1a";
               }}
-              onClick={() => handleTokenCardClick("28E5kC4U72iU2v60HY4sE00")}
+              onClick={() => handleTokenCardClick("prod_StJqGcAU3FuSgn")}
             >
               <div style={{ position: "relative" }}>
                 <img
@@ -285,7 +286,7 @@ export default function Payment() {
                 e.target.style.borderColor = "#ff4757";
                 e.target.style.backgroundColor = "#1a1a1a";
               }}
-              onClick={() => handleTokenCardClick("14A9AScmz0aMglWfCS4sE01")}
+              onClick={() => handleTokenCardClick("prod_StJrPfkRN4YqeJ")}
             >
               {/* MOST POPULAR Banner */}
               <div
@@ -377,7 +378,7 @@ export default function Payment() {
                 e.target.style.borderColor = "#fff";
                 e.target.style.backgroundColor = "#1a1a1a";
               }}
-              onClick={() => handleTokenCardClick("aFa3cu9an0aMc5G76m4sE02")}
+              onClick={() => handleTokenCardClick("prod_StJrIwD5TSqIWi")}
             >
               <div style={{ position: "relative" }}>
                 <img
@@ -450,7 +451,7 @@ export default function Payment() {
                 e.target.style.borderColor = "#ffd700";
                 e.target.style.backgroundColor = "#1a1a1a";
               }}
-              onClick={() => handleTokenCardClick("7sY4gygCP1eQglW1M24sE03")}
+              onClick={() => handleTokenCardClick("prod_StJrRfYuwc1WUw")}
             >
               {/* BEST VALUE Banner */}
               <div
