@@ -13,9 +13,7 @@ export default function Success() {
       return () => clearTimeout(timer);
     } else {
       // Close the page after countdown reaches 0
-      const token = new URLSearchParams(window.location.search).get("token");
-      window.location.href =
-        "com.gridlock.staging://close?success=true&token=" + token;
+      window.location.href = "com.gridlock.staging://close";
     }
   }, [countdown]);
   return (
@@ -43,7 +41,7 @@ export default function Success() {
             marginRight: "auto",
             padding: 10,
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-            border: "2px solid green",
+            border: "2px solid red",
             boxSizing: "border-box",
             marginBottom: 30,
             marginTop: 30,
@@ -55,16 +53,32 @@ export default function Success() {
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            fill="green"
+            fill="red"
             width="48"
             height="48"
           >
             <path d="M0 0h24v24H0z" fill="none" />
-            <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+            <line
+              x1="6"
+              y1="6"
+              x2="18"
+              y2="18"
+              stroke="red"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <line
+              x1="6"
+              y1="18"
+              x2="18"
+              y2="6"
+              stroke="red"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
           </svg>
         </div>
-        <h1>Payment Successful!</h1>
-        <p>Thank you for your purchase.</p>
+        <h1 style={{ color: "red" }}>Payment Failed!</h1>
         <p style={{ marginTop: 20 }}>
           Redirecting to home in {countdown} seconds...
         </p>
