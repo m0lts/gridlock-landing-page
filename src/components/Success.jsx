@@ -4,7 +4,7 @@ import { useEffect } from "react";
 export default function Success() {
   const [countdown, setCountdown] = useState(4);
 
-  const Token = new URLSearchParams(window.location.search).get("token");
+  // const Token = new URLSearchParams(window.location.search).get("token");
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => {
@@ -13,9 +13,9 @@ export default function Success() {
       return () => clearTimeout(timer);
     } else {
       // Close the page after countdown reaches 0
-      window.location.href = `https://gridlock.one/success?token=${Token}`;
+      window.location.href = "/";
     }
-  }, [Token, countdown]);
+  }, [countdown]);
   return (
     <section className="hero">
       <div className="hero-background" />
