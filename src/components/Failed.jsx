@@ -13,7 +13,7 @@ export default function Success() {
       return () => clearTimeout(timer);
     } else {
       // Close the page after countdown reaches 0
-      window.location.href = "com.gridlock.staging://close";
+      window.location.href = "com.gridlock.staging://close?success=false";
     }
   }, [countdown]);
   return (
