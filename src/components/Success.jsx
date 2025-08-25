@@ -1,11 +1,10 @@
-import { useNavigate } from "react-router-dom";
 import GridlockLogo from "../assets/logo-white.png";
 import { useState } from "react";
 import { useEffect } from "react";
 export default function Success() {
   const [countdown, setCountdown] = useState(4);
-  const navigate = useNavigate();
 
+  const Token = new URLSearchParams(window.location.search).get("token");
   useEffect(() => {
     if (countdown > 0) {
       const timer = setTimeout(() => {
@@ -14,9 +13,9 @@ export default function Success() {
       return () => clearTimeout(timer);
     } else {
       // Close the page after countdown reaches 0
-      navigate("/");
+      window.location.href = `https://gridlock.one/success?token=${Token}`;
     }
-  }, [countdown, navigate]);
+  }, [Token, countdown]);
   return (
     <section className="hero">
       <div className="hero-background" />
