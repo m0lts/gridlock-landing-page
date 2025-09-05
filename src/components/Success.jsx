@@ -15,7 +15,7 @@ export default function Success() {
       // Close the page after countdown reaches 0
       const token = new URLSearchParams(window.location.search).get("token");
       window.location.href =
-        "com.gridlock.staging://close?success=true&token=" + token;
+        "com.gridlock.gridlock://close?success=true&token=" + token;
     }
   }, [countdown]);
   return (
