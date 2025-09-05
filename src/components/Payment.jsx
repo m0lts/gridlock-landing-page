@@ -27,7 +27,7 @@ export default function Payment() {
       try {
         setIsLoading(true);
         const response = await fetch(
-          "https://europe-west2-gridlock-dev-e8594.cloudfunctions.net/createCheckoutSession",
+          "https://europe-west2-gridlock-3a102.cloudfunctions.net/createCheckoutSession",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
