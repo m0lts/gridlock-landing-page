@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import GridlockLogo from "../assets/logo-white.png";
 import GridBrainImage from "../assets/GridBrain.png";
-import TokenImage from "../assets/token.png";
+import TokenImage from "../assets/token1.png";
 import Token1 from "../assets/token1.png";
 import Token6 from "../assets/token6.png";
 import Token12 from "../assets/token12.png";
@@ -12,6 +12,7 @@ export default function Payment() {
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [searchParams] = useSearchParams();
   const userId = searchParams.get("userId");
+  const tokenCount = searchParams.get("token") || "0";
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -125,14 +126,41 @@ export default function Payment() {
               <span style={{ position: "relative", zIndex: 1 }}>GRIDBRAIN</span>
             </h2>
           </div>
-          <img
-            src={TokenImage}
-            alt="Token"
+          <div
             style={{
-              width: screenWidth > 900 ? 100 : 60,
-              height: screenWidth > 900 ? 100 : 60,
+              border: "2px solid #d946ef",
+              borderRadius: 12,
+              padding: screenWidth > 900 ? 16 : 12,
+              backgroundColor: "white",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+              minWidth: screenWidth > 900 ? 120 : 80,
             }}
-          />
+          >
+            <img
+              src={TokenImage}
+              alt="Token"
+              style={{
+                width: screenWidth > 900 ? 60 : 40,
+                height: screenWidth > 900 ? 60 : 40,
+              }}
+            />
+            <div
+              style={{
+                fontSize: screenWidth > 900 ? 18 : 14,
+                fontWeight: 700,
+                color: "#d946ef",
+                textAlign: "center",
+                lineHeight: 1.2,
+              }}
+            >
+              {tokenCount}x
+              <br />
+              TOKENS
+            </div>
+          </div>
         </div>
         <div
           style={{
