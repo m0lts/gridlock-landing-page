@@ -16,10 +16,10 @@ export const Hero = () => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
   };
 
+  const currentYear = new Date().getFullYear();
   useEffect(() => {
     const currentPath = window.location.pathname;
     if (currentPath === "/join") {
-      const currentYear = new Date().getFullYear();
       const marketingRef = doc(firestore, `marketingData`, `${currentYear}`);
       getDoc(marketingRef)
         .then((docSnapshot) => {
@@ -120,7 +120,7 @@ export const Hero = () => {
     {
       question: "How does Gridlock work?",
       answer:
-        "Gridlock allows you to predict F1 race results, compete in leagues, and win prizes. Simply submit predictions for each race weekend and track your performance on the leaderboard.",
+        "Gridlock allows you to predict race results, compete in leagues, and win prizes. Simply submit predictions for each race weekend and track your performance on the leaderboard.",
     },
     {
       question: "How to redeem my prize?",
@@ -169,7 +169,7 @@ export const Hero = () => {
               fontWeight: 700,
             }}
           >
-            Predict F1 Races, Compete, And win Prizes.
+            Predict Races, Compete, And Win Prizes.
           </h1>
           <p
             style={{
@@ -332,77 +332,6 @@ export const Hero = () => {
           </p>
         </div>
       </div>
-      <div
-        className="banner-section"
-        style={{
-          width: "100%",
-          display: screenWidth < 768 ? "flex" : "grid",
-          gridTemplateColumns:
-            screenWidth > 1265
-              ? "60% 40%"
-              : screenWidth < 900
-              ? "40% 60%"
-              : "50% 50%",
-          marginTop: 50,
-          flexDirection: "column",
-        }}
-      >
-        <div
-          className="text-side"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            width: screenWidth < 768 ? "80%" : "",
-          }}
-        >
-          <h2
-            style={{
-              paddingLeft: screenWidth < 500 ? 50 : 100,
-              marginTop: 25,
-              marginBottom: 25,
-              fontSize: screenWidth < 500 ? 24 : 36,
-            }}
-          >
-            WIN INCREDIBLE FORMULA 1 PRIZES
-          </h2>
-          <div
-            className="parallelogram"
-            style={{ width: screenWidth > 400 ? "100%" : "75%" }}
-          >
-            <p
-              style={{
-                paddingLeft: screenWidth < 500 ? 50 : 100,
-                paddingTop: 20,
-                paddingBottom: 20,
-                paddingRight: 20,
-                fontSize: screenWidth < 500 ? 12 : 18,
-                fontWeight: 500,
-              }}
-            >
-              The top 3 of Gridlock 2025 will win a heap of awesome Formula 1
-              prizes!
-            </p>
-          </div>
-        </div>
-        <div
-          className="image-side"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <img
-            src={Positions}
-            alt="Top 3 Prizes"
-            style={{
-              width: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250,
-              height: screenWidth > 1050 ? 450 : screenWidth > 400 ? 350 : 250,
-            }}
-          />
-        </div>
-      </div>
       {screenWidth < 768 ? (
         <div
           className="banner-section"
@@ -448,7 +377,7 @@ export const Hero = () => {
                 }}
               >
                 Create and join private leagues - prove to your friends that you
-                know the most about Formula 1.
+                know the most.
               </p>
             </div>
           </div>
@@ -533,7 +462,7 @@ export const Hero = () => {
                 }}
               >
                 Create and join private leagues - prove to your friends that you
-                know the most about Formula 1.
+                know the most.
               </p>
             </div>
           </div>
@@ -584,8 +513,7 @@ export const Hero = () => {
               }}
             >
               On some race weekends prizes will be up for grabs for the best
-              prediction - your chance to win your favourite team’s merch or
-              unique experiences for free!
+              prediction!
             </p>
           </div>
         </div>
@@ -698,15 +626,15 @@ export const Hero = () => {
             <a href="#" style={{ color: "white" }}>
               Support
             </a>
-            <a href="#" style={{ color: "white" }}>
+            <a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=3c0c4470-16e7-44b1-8700-97ba61830c3e" style={{ color: "white" }}>
               Privacy Policy
             </a>
-            <a href="#" style={{ color: "white" }}>
+            <a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=5ff14f74-440f-4efc-847c-ad668d378a47" style={{ color: "white" }}>
               Terms Of Use
             </a>
-            <a href="/payment?userId=anonymous" style={{ color: "white" }}>
+            {/* <a href="/payment?userId=anonymous" style={{ color: "white" }}>
               Payment
-            </a>
+            </a> */}
           </nav>
         </div>
         <p style={{ marginTop: 15, marginBottom: 15 }}>
@@ -717,7 +645,7 @@ export const Hero = () => {
           any of the drivers or teams displayed in our applications and such
           data is for informational purposes only.
         </p>
-        <h4>&copy; 2024 Company 57 Limited. All rights reserved.</h4>
+        <h4>&copy; {currentYear} Company 57 Limited. All rights reserved.</h4>
       </footer>
     </section>
   );
