@@ -4,6 +4,7 @@ import Payment from "./components/Payment";
 import "./assets/styles.css";
 import Success from "./components/Success";
 import Failed from "./components/Failed";
+import CheckoutBridge from "./components/CheckoutBridge";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/success" element={<Success />} />
         <Route path="/failure" element={<Failed />} />
+        <Route path="/checkout-bridge" element={<CheckoutBridge />} />
       </Routes>
     </>
   );

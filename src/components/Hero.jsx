@@ -5,12 +5,55 @@ import Positions from "../assets/positions.png";
 import PhoneScreen from "../assets/league.png";
 import Prizes from "../assets/prizes.png";
 import { useEffect, useState } from "react";
-import { firestore } from "../firebaseConfig";
+import { firestore, auth, WEB_ENV } from "../firebaseConfig";
 import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
+import {
+  onAuthStateChanged,
+  signInWithPopup,
+  isSignInWithEmailLink,
+  sendSignInLinkToEmail,
+  signInWithEmailLink,
+  signOut,
+} from "firebase/auth";
 
 export const Hero = () => {
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [expandedFAQ, setExpandedFAQ] = useState(null);
+
+  // ADD state
+  const [user, setUser] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
+  const [pendingRedirect, setPendingRedirect] = useState(null);
+
+  // Track auth state
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u ? { uid: u.uid, email: u.email || undefined } : null);
+      // If we were waiting to redirect after login, do it now
+      if (u && pendingRedirect) {
+        const url = new URL(pendingRedirect, window.location.origin);
+        url.searchParams.set("userId", u.uid);
+        window.location.href = url.toString();
+      }
+    });
+    return () => unsub();
+  }, [pendingRedirect]);
+
+  // Handle email-link completion (when user clicks the magic link)
+  useEffect(() => {
+    if (isSignInWithEmailLink(auth, window.location.href)) {
+      const stored = window.localStorage.getItem("emailForSignIn");
+      const email = stored || window.prompt("Enter your email to complete sign-in") || "";
+      if (email) {
+        signInWithEmailLink(auth, email, window.location.href)
+          .then(() => {
+            window.localStorage.removeItem("emailForSignIn");
+          })
+          .catch((e) => console.error("Email link sign-in failed", e));
+      }
+    }
+  }, []);
 
   const handleFAQClick = (index) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
@@ -134,9 +177,122 @@ export const Hero = () => {
     },
   ];
 
+  const openAuthModal = (redirectTo) => {
+    if (redirectTo) setPendingRedirect(redirectTo);
+    setShowAuthModal(true);
+  };
+  
+  const closeAuthModal = () => {
+    setShowAuthModal(false);
+    setPendingRedirect(null);
+    setEmailInput("");
+  };
+  
+  const handleSendEmailLink = async () => {
+    try {
+      if (!emailInput) {
+        alert("Please enter your email.");
+        return;
+      }
+      await sendSignInLinkToEmail(auth, emailInput, {
+        url: window.location.href,
+        handleCodeInApp: true,
+      });
+      window.localStorage.setItem("emailForSignIn", emailInput);
+      alert("Check your email for a sign-in link.");
+    } catch (e) {
+      console.error(e);
+      alert("Failed to send sign-in link.");
+    }
+  };
+  
+  const handleSignOut = async () => {
+    await signOut(auth);
+  };
+  
+
+  const goToPurchase = () => {
+    const target = "/payment";
+  
+    const env = WEB_ENV === "dev" ? "dev" : "prod";
+  
+    if (!user) {
+      // Not signed in → open modal and remember redirect
+      openAuthModal(`${target}?env=${env}`);
+      return;
+    }
+  
+    // Signed in → go straight there
+    const url = new URL(target, window.location.origin);
+    url.searchParams.set("env", env);
+    url.searchParams.set("userId", user.uid);
+  
+    window.location.href = url.toString();
+  };
+
   return (
     <section className="hero">
       <div className="hero-background" />
+      <div
+  style={{
+    position: "absolute",
+    top: 16,
+    right: 16,
+    display: "flex",
+    gap: 12,
+    zIndex: 50,
+  }}
+>
+  {/* Sign In / Account */}
+  {user ? (
+    <button
+      onClick={handleSignOut}
+      style={{
+        backgroundColor: "#e63946", // red
+        color: "#fff",
+        border: "none",
+        borderRadius: 8,
+        padding: "10px 14px",
+        fontWeight: 700,
+        cursor: "pointer",
+      }}
+      title={user.email || user.uid}
+    >
+      SIGN OUT
+    </button>
+  ) : (
+    <button
+      onClick={() => openAuthModal()}
+      style={{
+        backgroundColor: "#e63946", // red
+        color: "#fff",
+        border: "none",
+        borderRadius: 8,
+        padding: "10px 14px",
+        fontWeight: 700,
+        cursor: "pointer",
+      }}
+    >
+      SIGN IN
+    </button>
+  )}
+
+  {/* GridBrain Tokens */}
+  <button
+    onClick={goToPurchase}
+    style={{
+      backgroundColor: "#7c3aed", // purple
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "10px 14px",
+      fontWeight: 700,
+      cursor: "pointer",
+    }}
+  >
+    GRIDBRAIN TOKENS
+  </button>
+</div>
       <header className="hero-logo">
         <img
           src={GridlockLogo}
@@ -632,9 +788,9 @@ export const Hero = () => {
             <a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=5ff14f74-440f-4efc-847c-ad668d378a47" style={{ color: "white" }}>
               Terms Of Use
             </a>
-            {/* <a href="/payment?userId=anonymous" style={{ color: "white" }}>
+            <a href="/payment?userId=anonymous" style={{ color: "white" }}>
               Payment
-            </a> */}
+            </a>
           </nav>
         </div>
         <p style={{ marginTop: 15, marginBottom: 15 }}>
@@ -647,6 +803,94 @@ export const Hero = () => {
         </p>
         <h4>&copy; {currentYear} Company 57 Limited. All rights reserved.</h4>
       </footer>
+      {showAuthModal && (
+  <div
+    onClick={closeAuthModal}
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.6)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1000,
+      padding: 16,
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        width: 360,
+        maxWidth: "90vw",
+        background: "#0f0f10",
+        color: "#fff",
+        borderRadius: 12,
+        border: "1px solid #333",
+        padding: 20,
+        boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h3 style={{ margin: 0 }}>Sign in</h3>
+        <button
+          onClick={closeAuthModal}
+          style={{
+            background: "transparent",
+            color: "#aaa",
+            border: "none",
+            fontSize: 18,
+            cursor: "pointer",
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <p style={{ marginTop: 8, marginBottom: 16, color: "#bbb" }}>
+        Sign in with your Gridlock email to manage and purchase GridBrain tokens.
+      </p>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+        <input
+          type="email"
+          placeholder="Email for sign-in link"
+          value={emailInput}
+          onChange={(e) => setEmailInput(e.target.value)}
+          style={{
+            flex: 1,
+            borderRadius: 8,
+            border: "1px solid #444",
+            background: "#111",
+            color: "#fff",
+            padding: "10px 12px",
+            outline: "none",
+          }}
+        />
+        <button
+          onClick={handleSendEmailLink}
+          style={{
+            backgroundColor: "#7c3aed",
+            color: "#fff",
+            border: "none",
+            borderRadius: 8,
+            padding: "10px 12px",
+            fontWeight: 700,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Email link
+        </button>
+      </div>
+
+      {pendingRedirect && (
+        <div style={{ marginTop: 8, color: "#8dd58d", fontSize: 12 }}>
+          You’ll be redirected after sign-in…
+        </div>
+      )}
+    </div>
+  </div>
+)}
     </section>
   );
 };

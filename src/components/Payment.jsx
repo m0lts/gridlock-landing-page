@@ -13,7 +13,26 @@ export default function Payment() {
   const [searchParams] = useSearchParams();
   const userId = searchParams.get("userId");
   const tokenCount = searchParams.get("token") || "0";
+  const env = (searchParams.get("env") || "prod").toLowerCase();
+  const isDev = env === "dev";
+  const CHECKOUT_FN = isDev
+    ? "https://europe-west2-gridlock-dev-e8594.cloudfunctions.net/createCheckoutSession"
+    : "https://europe-west2-gridlock-3a102.cloudfunctions.net/createCheckoutSession";
   const [isLoading, setIsLoading] = useState(false);
+
+  const PRICES = isDev
+  ? {
+      one: "price_1SKGnKB1y3JeZq39DgBjUOPV",
+      six: "price_1SKGncB1y3JeZq39kGqQ4oEV",
+      twelve: "price_1SKGnoB1y3JeZq39ikrEWrly",
+      twentyFour: "price_1SKGnzB1y3JeZq39RZr2bf2N",
+    }
+  : {
+      one: "price_1RsnNdB1y3JeZq39rIjSf6On",
+      six: "price_1RsnOHB1y3JeZq39wGPdstNI",
+      twelve: "price_1RsnPUB1y3JeZq39sziacMcd",
+      twentyFour: "price_1RsnPqB1y3JeZq393Lpu2PgH",
+    };
 
   useEffect(() => {
     const handleResize = () => setScreenWidth(window.innerWidth);
@@ -21,49 +40,45 @@ export default function Payment() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleTokenCardClick = async (productId) => {
-    const clientReferenceId = encodeURIComponent(userId || "anonymous");
-
-    if (typeof productId === "string" && productId.startsWith("prod_")) {
-      try {
-        setIsLoading(true);
-        const response = await fetch(
-          "https://europe-west2-gridlock-3a102.cloudfunctions.net/createCheckoutSession",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: userId || "anonymous", productId }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-
-        const data = await response.json().catch(() => ({}));
-        const checkoutUrl = data.url || data.checkoutUrl || data.stripeUrl;
-
-        if (checkoutUrl) {
-          // open checkoutUrl in new tab
-          window.open(checkoutUrl, "_self");
-        } else {
-          console.error("No checkout URL returned:", data);
-          alert("Unable to start checkout. Please try again.");
-        }
-      } catch (error) {
-        console.error("Failed to create checkout session:", error);
-        alert("Unable to start checkout. Please try again.");
-      } finally {
-        setIsLoading(false);
+  const handleTokenCardClick = async (priceId) => {
+    if (!userId && !isDev) {
+      alert("Please sign in from the app to purchase tokens.");
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const response = await fetch(CHECKOUT_FN, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          env,
+          userId: userId || "anonymous",
+          priceId,
+          tokenCount: Number(tokenCount || 0),
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
       }
-    } else {
-      const redirectUrl = `https://buy.stripe.com/${productId}?userid=${clientReferenceId}`;
-      window.open(redirectUrl, "_self");
+      const data = await response.json().catch(() => ({}));
+      const checkoutUrl = data.url || data.checkoutUrl || data.stripeUrl;
+      if (checkoutUrl) {
+        window.open(checkoutUrl, "_self");
+      } else {
+        console.error("No checkout URL returned:", data);
+        alert("Unable to start checkout. Please try again.");
+      }
+    } catch (error) {
+      console.error("Failed to create checkout session:", error);
+      alert("Unable to start checkout. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+
   return (
-    <section className="hero">
-      <div className="hero-background" />
+    <section className="hero payment" style={{ backgroundColor: "#1a1a1a" }}>
       <header className="hero-logo">
         <img
           src={GridlockLogo}
@@ -126,7 +141,7 @@ export default function Payment() {
               <span style={{ position: "relative", zIndex: 1 }}>GRIDBRAIN</span>
             </h2>
           </div>
-          <div
+          {/* <div
             style={{
               border: "2px solid #d946ef",
               borderRadius: 12,
@@ -160,7 +175,7 @@ export default function Payment() {
               <br />
               TOKENS
             </div>
-          </div>
+          </div> */}
         </div>
         <div
           style={{
@@ -208,13 +223,49 @@ export default function Payment() {
             <div
               style={{
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
                 width: "100%",
                 height: "100%",
+                color: "white",
+                gap: "15px",
               }}
             >
-              <p style={{ fontSize: 16, fontWeight: 700 }}>Loading...</p>
+              {/* Spinning brain / circle */}
+              <div
+                style={{
+                  width: 50,
+                  height: 50,
+                  border: "4px solid rgba(255, 255, 255, 0.2)",
+                  borderTopColor: "#8b5cf6", // purple highlight
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite",
+                  marginTop: 100,
+                }}
+              ></div>
+
+              {/* Loading text */}
+              <p
+                style={{
+                  fontSize: 16,
+                  fontWeight: 600,
+                  color: "rgba(255,255,255,0.85)",
+                  marginBottom: 100,
+                }}
+              >
+                Redirecting you...
+              </p>
+
+              {/* Inline keyframes */}
+              <style>
+                {`
+                  @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                  }
+                `}
+              </style>
             </div>
           ) : (
             <div
@@ -250,7 +301,7 @@ export default function Payment() {
                   marginBottom: screenWidth < 768 ? 20 : 0,
                 }}
                 disabled={isLoading}
-                onClick={() => handleTokenCardClick("prod_StJqGcAU3FuSgn")}
+                onClick={() => handleTokenCardClick(PRICES.one)}
               >
                 <div style={{ position: "relative" }}>
                   <img
@@ -312,7 +363,7 @@ export default function Payment() {
                   marginBottom: screenWidth < 768 ? 20 : 0,
                 }}
                 disabled={isLoading}
-                onClick={() => handleTokenCardClick("prod_StJrPfkRN4YqeJ")}
+                onClick={() => handleTokenCardClick(PRICES.six)}
               >
                 {/* MOST POPULAR Banner */}
                 <div
@@ -392,7 +443,7 @@ export default function Payment() {
                   position: "relative",
                 }}
                 disabled={isLoading}
-                onClick={() => handleTokenCardClick("prod_StJrIwD5TSqIWi")}
+                onClick={() => handleTokenCardClick(PRICES.twelve)}
               >
                 <div style={{ position: "relative" }}>
                   <img
@@ -454,7 +505,7 @@ export default function Payment() {
                   position: "relative",
                 }}
                 disabled={isLoading}
-                onClick={() => handleTokenCardClick("prod_StJrRfYuwc1WUw")}
+                onClick={() => handleTokenCardClick(PRICES.twentyFour)}
               >
                 {/* BEST VALUE Banner */}
                 <div

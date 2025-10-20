@@ -1,17 +1,30 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+
+const isDev =
+  import.meta.env.MODE === "development" ||
+  window.location.hostname === "localhost";
+
+const pick = (key) =>
+  import.meta.env[
+    (isDev ? `VITE_${key}_DEV` : `VITE_${key}_PROD`)
+  ];
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API,
-  authDomain: "gridlock-3a102.firebaseapp.com",
-  projectId: "gridlock-3a102",
-  storageBucket: "gridlock-3a102.firebasestorage.app",
-  messagingSenderId: "194833496400",
-  appId: "1:194833496400:web:c8618dd571977e15c59455",
-  measurementId: "G-L0XRLLZK0P"
+  apiKey: pick("FIREBASE_API"),
+  authDomain: pick("FIREBASE_AUTH_DOMAIN"),
+  projectId: pick("FIREBASE_PROJECT_ID"),
+  storageBucket: pick("FIREBASE_STORAGE"),
+  messagingSenderId: pick("FIREBASE_SENDER_ID"),
+  appId: pick("FIREBASE_APP_ID"),
+  measurementId: pick("FIREBASE_MEASUREMENT_ID"),
 };
 
-const app = initializeApp(firebaseConfig);
-const firestore = getFirestore(app);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-export { firestore };
+export const auth = getAuth(app);
+export const firestore = getFirestore(app);
+
+// Optional: export which env we think we are in
+export const WEB_ENV = isDev ? "dev" : "prod";
