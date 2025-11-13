@@ -5,6 +5,7 @@ import "./assets/styles.css";
 import Success from "./components/Success";
 import Failed from "./components/Failed";
 import CheckoutBridge from "./components/CheckoutBridge";
+import Admin from "./components/Admin";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/success" element={<Success />} />
         <Route path="/failure" element={<Failed />} />
         <Route path="/checkout-bridge" element={<CheckoutBridge />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </>
   );

@@ -5,6 +5,7 @@ import Positions from "../assets/positions.png";
 import PhoneScreen from "../assets/league.png";
 import Prizes from "../assets/prizes.png";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { firestore, auth, WEB_ENV } from "../firebaseConfig";
 import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 import {
@@ -17,6 +18,7 @@ import {
 } from "firebase/auth";
 
 export const Hero = () => {
+  const navigate = useNavigate();
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const [expandedFAQ, setExpandedFAQ] = useState(null);
 
@@ -25,6 +27,7 @@ export const Hero = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [emailInput, setEmailInput] = useState("");
   const [pendingRedirect, setPendingRedirect] = useState(null);
+  const [adminEmail, setAdminEmail] = useState(null);
 
   // Track auth state
   useEffect(() => {
@@ -58,6 +61,23 @@ export const Hero = () => {
   const handleFAQClick = (index) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
   };
+
+  // Fetch admin email from Firestore metadata
+  useEffect(() => {
+    const fetchAdminEmail = async () => {
+      try {
+        const metadataRef = doc(firestore, "metadata", "admin");
+        const docSnap = await getDoc(metadataRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setAdminEmail(data.allowedEmail || null);
+        }
+      } catch (error) {
+        console.error("Error fetching admin email:", error);
+      }
+    };
+    fetchAdminEmail();
+  }, []);
 
   const currentYear = new Date().getFullYear();
   useEffect(() => {
@@ -292,6 +312,24 @@ export const Hero = () => {
   >
     GRIDBRAIN TOKENS
   </button>
+
+  {/* Admin Dashboard - Only for specific email from Firestore */}
+  {user?.email && adminEmail && user.email === adminEmail && (
+    <button
+      onClick={() => navigate("/admin")}
+      style={{
+        backgroundColor: "#ff4757", // red
+        color: "#fff",
+        border: "none",
+        borderRadius: 8,
+        padding: "10px 14px",
+        fontWeight: 700,
+        cursor: "pointer",
+      }}
+    >
+      ADMIN
+    </button>
+  )}
 </div>
       <header className="hero-logo">
         <img

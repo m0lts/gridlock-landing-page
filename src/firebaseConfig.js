@@ -28,3 +28,6 @@ export const firestore = getFirestore(app);
 
 // Optional: export which env we think we are in
 export const WEB_ENV = isDev ? "dev" : "prod";
+
+// Export project ID
+export const PROJECT_ID = firebaseConfig.projectId;
