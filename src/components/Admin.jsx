@@ -61,6 +61,13 @@ export default function Admin() {
   const [reportResult, setReportResult] = useState(null);
   const [runningAnalysis, setRunningAnalysis] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [runningRecalculation, setRunningRecalculation] = useState(false);
+  const [recalculationResult, setRecalculationResult] = useState(null);
+  const [updatingStandings, setUpdatingStandings] = useState(false);
+  const [standingsUpdateResult, setStandingsUpdateResult] = useState(null);
+  const [preparingSeason, setPreparingSeason] = useState(false);
+  const [seasonPrepResult, setSeasonPrepResult] = useState(null);
+  const [showSeasonPrepConfirm, setShowSeasonPrepConfirm] = useState(false);
 
   // Fetch admin credentials from Firestore metadata collection
   useEffect(() => {
@@ -461,6 +468,123 @@ export default function Admin() {
       setAnalysisResult(null);
     } finally {
       setRunningAnalysis(false);
+    }
+  };
+
+  const handleRecalculatePoints = async () => {
+    const apiKey = import.meta.env.VITE_GRIDLOCK_API;
+    if (!apiKey) {
+      alert("VITE_GRIDLOCK_API not found in environment variables");
+      return;
+    }
+
+    setRunningRecalculation(true);
+    setRecalculationResult(null);
+
+    try {
+      const body = {};
+      // If a race is selected, include competitionId in the body
+      if (selectedRaceId) {
+        body.competitionId = selectedRaceId;
+      }
+
+      const response = await fetch("https://invokepointsrecalculation-wgstcuv22a-nw.a.run.app/", {
+        method: "POST",
+        headers: {
+          "gridlock_api": apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to recalculate points: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.text();
+      setRecalculationResult(result);
+    } catch (error) {
+      console.error("Error recalculating points:", error);
+      alert(`Failed to recalculate points: ${error.message}`);
+      setRecalculationResult(null);
+    } finally {
+      setRunningRecalculation(false);
+    }
+  };
+
+  const handleUpdateGlobalStandings = async () => {
+    if (!f1Data.previousEvent || !f1Data.previousEvent.id) {
+      alert("No previous event found. Please wait for F1 data to load.");
+      return;
+    }
+
+    setUpdatingStandings(true);
+    setStandingsUpdateResult(null);
+
+    try {
+      const currentYear = f1Data.seasonYear || new Date().getFullYear();
+      const competitionId = String(f1Data.previousEvent.id);
+      const serviceRef = doc(firestore, `services_${currentYear}`, competitionId);
+
+      // First, set pointsCalculated to false
+      await updateDoc(serviceRef, {
+        pointsCalculated: false,
+      });
+
+      // Small delay to ensure the update is processed
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Then, set pointsCalculated to true (this triggers the cloud function)
+      await updateDoc(serviceRef, {
+        pointsCalculated: true,
+      });
+
+      setStandingsUpdateResult(`Successfully updated pointsCalculated for event ${f1Data.previousEvent.name} (ID: ${competitionId}). The cloud function should now trigger to update global standings.`);
+    } catch (error) {
+      console.error("Error updating global standings:", error);
+      const errorMessage = error.message || "Unknown error occurred";
+      setStandingsUpdateResult(`Error: ${errorMessage}`);
+      alert(`Failed to update global standings: ${errorMessage}`);
+    } finally {
+      setUpdatingStandings(false);
+    }
+  };
+
+  const handlePrepareForNewSeason = async () => {
+    const apiKey = import.meta.env.VITE_GRIDLOCK_API;
+    if (!apiKey) {
+      alert("VITE_GRIDLOCK_API not found in environment variables");
+      return;
+    }
+
+    setPreparingSeason(true);
+    setSeasonPrepResult(null);
+    setShowSeasonPrepConfirm(false);
+
+    try {
+      const response = await fetch("https://preparefornewseason-wgstcuv22a-nw.a.run.app/", {
+        method: "POST",
+        headers: {
+          "gridlock_api": apiKey,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to prepare for new season: ${response.status} ${errorText}`);
+      }
+
+      const result = await response.text();
+      setSeasonPrepResult(result);
+    } catch (error) {
+      console.error("Error preparing for new season:", error);
+      const errorMessage = error.message || "Unknown error occurred";
+      setSeasonPrepResult(`Error: ${errorMessage}`);
+      alert(`Failed to prepare for new season: ${errorMessage}`);
+    } finally {
+      setPreparingSeason(false);
     }
   };
 
@@ -1699,7 +1823,7 @@ export default function Admin() {
                 <select
                   value={selectedRaceId}
                   onChange={(e) => setSelectedRaceId(e.target.value)}
-                  disabled={runningReport || runningAnalysis}
+                  disabled={runningReport || runningAnalysis || runningRecalculation || updatingStandings}
                   style={{
                     width: "100%",
                     padding: "10px 12px",
@@ -1708,7 +1832,7 @@ export default function Admin() {
                     borderRadius: 6,
                     color: "#fff",
                     fontSize: 12,
-                    cursor: runningReport || runningAnalysis ? "not-allowed" : "pointer",
+                    cursor: runningReport || runningAnalysis || runningRecalculation || updatingStandings ? "not-allowed" : "pointer",
                   }}
                 >
                   <option value="">-- Select a race --</option>
@@ -1738,42 +1862,84 @@ export default function Admin() {
                 </select>
               </div>
 
-              <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+              <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
                 <button
                   onClick={handleRunReport}
-                  disabled={!selectedRaceId || runningReport || runningAnalysis}
+                  disabled={!selectedRaceId || runningReport || runningAnalysis || runningRecalculation || updatingStandings}
                   style={{
                     flex: 1,
+                    minWidth: "150px",
                     padding: "12px 16px",
                     borderRadius: 6,
-                    backgroundColor: runningReport || !selectedRaceId || runningAnalysis ? "#444" : "#7c3aed",
+                    backgroundColor: runningReport || !selectedRaceId || runningAnalysis || runningRecalculation || updatingStandings ? "#444" : "#7c3aed",
                     color: "#fff",
                     border: "none",
                     fontSize: 12,
                     fontWeight: 600,
-                    cursor: runningReport || !selectedRaceId || runningAnalysis ? "not-allowed" : "pointer",
-                    opacity: runningReport || !selectedRaceId || runningAnalysis ? 0.6 : 1,
+                    cursor: runningReport || !selectedRaceId || runningAnalysis || runningRecalculation || updatingStandings ? "not-allowed" : "pointer",
+                    opacity: runningReport || !selectedRaceId || runningAnalysis || runningRecalculation || updatingStandings ? 0.6 : 1,
                   }}
                 >
                   {runningReport ? "Running..." : "Run Weekend Report"}
                 </button>
                 <button
                   onClick={handleRunAnalysis}
-                  disabled={!selectedRaceId || runningAnalysis || runningReport}
+                  disabled={!selectedRaceId || runningAnalysis || runningReport || runningRecalculation || updatingStandings}
                   style={{
                     flex: 1,
+                    minWidth: "150px",
                     padding: "12px 16px",
                     borderRadius: 6,
-                    backgroundColor: runningAnalysis || !selectedRaceId || runningReport ? "#444" : "#29F4D2",
+                    backgroundColor: runningAnalysis || !selectedRaceId || runningReport || runningRecalculation || updatingStandings ? "#444" : "#29F4D2",
                     color: "#fff",
                     border: "none",
                     fontSize: 12,
                     fontWeight: 600,
-                    cursor: runningAnalysis || !selectedRaceId || runningReport ? "not-allowed" : "pointer",
-                    opacity: runningAnalysis || !selectedRaceId || runningReport ? 0.6 : 1,
+                    cursor: runningAnalysis || !selectedRaceId || runningReport || runningRecalculation || updatingStandings ? "not-allowed" : "pointer",
+                    opacity: runningAnalysis || !selectedRaceId || runningReport || runningRecalculation || updatingStandings ? 0.6 : 1,
                   }}
                 >
                   {runningAnalysis ? "Running..." : "Run Model Analysis"}
+                </button>
+                <button
+                  onClick={handleRecalculatePoints}
+                  disabled={runningRecalculation || runningReport || runningAnalysis || updatingStandings}
+                  style={{
+                    flex: 1,
+                    minWidth: "150px",
+                    padding: "12px 16px",
+                    borderRadius: 6,
+                    backgroundColor: runningRecalculation || runningReport || runningAnalysis || updatingStandings ? "#444" : "#ff6b6b",
+                    color: "#fff",
+                    border: "none",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: runningRecalculation || runningReport || runningAnalysis || updatingStandings ? "not-allowed" : "pointer",
+                    opacity: runningRecalculation || runningReport || runningAnalysis || updatingStandings ? 0.6 : 1,
+                  }}
+                >
+                  {runningRecalculation ? "Running..." : "Recalculate Points"}
+                </button>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <button
+                  onClick={handleUpdateGlobalStandings}
+                  disabled={updatingStandings || runningReport || runningAnalysis || runningRecalculation || !f1Data.previousEvent}
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    borderRadius: 6,
+                    backgroundColor: updatingStandings || runningReport || runningAnalysis || runningRecalculation || !f1Data.previousEvent ? "#444" : "#10b981",
+                    color: "#fff",
+                    border: "none",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: updatingStandings || runningReport || runningAnalysis || runningRecalculation || !f1Data.previousEvent ? "not-allowed" : "pointer",
+                    opacity: updatingStandings || runningReport || runningAnalysis || runningRecalculation || !f1Data.previousEvent ? 0.6 : 1,
+                  }}
+                >
+                  {updatingStandings ? "Updating..." : "Update Global Standings"}
                 </button>
               </div>
 
@@ -1831,11 +1997,129 @@ export default function Admin() {
                 </div>
               )}
 
+              {recalculationResult && (
+                <div style={{
+                  marginTop: 20,
+                  padding: 15,
+                  backgroundColor: "#2a2a2a",
+                  borderRadius: 6,
+                  border: "1px solid #444",
+                  marginBottom: 20,
+                }}>
+                  <h4 style={{ margin: "0 0 10px", color: "#ff6b6b", fontSize: 12, fontWeight: 600 }}>
+                    POINTS RECALCULATION RESULT
+                  </h4>
+                  <pre style={{
+                    margin: 0,
+                    color: "#fff",
+                    fontSize: 11,
+                    fontFamily: "monospace",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    maxHeight: "400px",
+                    overflowY: "auto",
+                  }}>
+                    {recalculationResult}
+                  </pre>
+                </div>
+              )}
+
+              {standingsUpdateResult && (
+                <div style={{
+                  marginTop: 20,
+                  padding: 15,
+                  backgroundColor: "#2a2a2a",
+                  borderRadius: 6,
+                  border: "1px solid #444",
+                  marginBottom: 20,
+                }}>
+                  <h4 style={{ margin: "0 0 10px", color: "#10b981", fontSize: 12, fontWeight: 600 }}>
+                    GLOBAL STANDINGS UPDATE RESULT
+                  </h4>
+                  <pre style={{
+                    margin: 0,
+                    color: "#fff",
+                    fontSize: 11,
+                    fontFamily: "monospace",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    maxHeight: "400px",
+                    overflowY: "auto",
+                  }}>
+                    {standingsUpdateResult}
+                  </pre>
+                </div>
+              )}
+
+              {seasonPrepResult && (
+                <div style={{
+                  marginTop: 20,
+                  padding: 15,
+                  backgroundColor: "#2a2a2a",
+                  borderRadius: 6,
+                  border: "1px solid #444",
+                  marginBottom: 20,
+                }}>
+                  <h4 style={{ margin: "0 0 10px", color: "#ff4757", fontSize: 12, fontWeight: 600 }}>
+                    SEASON PREPARATION RESULT
+                  </h4>
+                  <pre style={{
+                    margin: 0,
+                    color: "#fff",
+                    fontSize: 11,
+                    fontFamily: "monospace",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                    maxHeight: "400px",
+                    overflowY: "auto",
+                  }}>
+                    {seasonPrepResult}
+                  </pre>
+                </div>
+              )}
+
               {!import.meta.env.VITE_GRIDLOCK_API && (
                 <p style={{ marginTop: 10, color: "#ff4757", fontSize: 11 }}>
                   ⚠️ Note: VITE_GRIDLOCK_API not found in environment variables
                 </p>
               )}
+
+              {/* Dangerous: Prepare for New Season */}
+              <div style={{
+                marginTop: 30,
+                padding: 20,
+                backgroundColor: "#2a1a1a",
+                borderRadius: 8,
+                border: "2px solid #ff4757",
+                marginBottom: 20,
+              }}>
+                <h3 style={{ margin: "0 0 10px", color: "#ff4757", fontSize: 14, fontWeight: 700 }}>
+                  ⚠️ DANGEROUS OPERATION
+                </h3>
+                <p style={{ margin: "0 0 15px", color: "#ff9999", fontSize: 11, lineHeight: 1.5 }}>
+                  This will reset all user data, league standings, and global standings for the new season. 
+                  This operation can only be run once per year and will be blocked if already executed. 
+                  Use with extreme caution.
+                </p>
+                <button
+                  onClick={() => setShowSeasonPrepConfirm(true)}
+                  disabled={preparingSeason || runningReport || runningAnalysis || runningRecalculation || updatingStandings}
+                  style={{
+                    width: "100%",
+                    padding: "14px 16px",
+                    borderRadius: 6,
+                    backgroundColor: preparingSeason || runningReport || runningAnalysis || runningRecalculation || updatingStandings ? "#444" : "#ff4757",
+                    color: "#fff",
+                    border: "none",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: preparingSeason || runningReport || runningAnalysis || runningRecalculation || updatingStandings ? "not-allowed" : "pointer",
+                    opacity: preparingSeason || runningReport || runningAnalysis || runningRecalculation || updatingStandings ? 0.6 : 1,
+                  }}
+                >
+                  {preparingSeason ? "Preparing Season..." : "Prepare for New Season"}
+                </button>
+              </div>
             </div>
             
             {/* Bug Report Modal */}
@@ -2220,6 +2504,87 @@ export default function Admin() {
                       }}
                     >
                       Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Season Preparation Confirmation Modal */}
+            {showSeasonPrepConfirm && (
+              <div
+                onClick={() => setShowSeasonPrepConfirm(false)}
+                style={{
+                  position: "fixed",
+                  inset: 0,
+                  backgroundColor: "rgba(0,0,0,0.9)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 2000,
+                  padding: 20,
+                }}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    backgroundColor: "#2a1a1a",
+                    borderRadius: 12,
+                    padding: 30,
+                    maxWidth: 500,
+                    width: "100%",
+                    border: "2px solid #ff4757",
+                  }}
+                >
+                  <h2 style={{ margin: "0 0 15px", color: "#ff4757", fontSize: 20, fontWeight: 700 }}>
+                    ⚠️ DANGEROUS OPERATION
+                  </h2>
+                  <p style={{ margin: "0 0 20px", color: "#ff9999", fontSize: 13, lineHeight: 1.6 }}>
+                    You are about to prepare for a new season. This will:
+                  </p>
+                  <ul style={{ margin: "0 0 20px", paddingLeft: 20, color: "#ff9999", fontSize: 12, lineHeight: 1.8 }}>
+                    <li>Reset all user data (gridBoostUsed, qualiBoostUsed, hasPredicted, totalPoints, topPredictionsCount)</li>
+                    <li>Reset all public league standings</li>
+                    <li>Reset all private league standings</li>
+                    <li>Reset global standings</li>
+                  </ul>
+                  <p style={{ margin: "0 0 20px", color: "#ff9999", fontSize: 13, lineHeight: 1.6, fontWeight: 600 }}>
+                    This operation can only be run once per year. The system will block it if it has already been executed.
+                  </p>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button
+                      onClick={() => setShowSeasonPrepConfirm(false)}
+                      style={{
+                        flex: 1,
+                        padding: "12px 16px",
+                        borderRadius: 6,
+                        backgroundColor: "#444",
+                        color: "#fff",
+                        border: "none",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        cursor: "pointer",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handlePrepareForNewSeason}
+                      disabled={preparingSeason}
+                      style={{
+                        flex: 1,
+                        padding: "12px 16px",
+                        borderRadius: 6,
+                        backgroundColor: preparingSeason ? "#444" : "#ff4757",
+                        color: "#fff",
+                        border: "none",
+                        fontSize: 13,
+                        fontWeight: 700,
+                        cursor: preparingSeason ? "not-allowed" : "pointer",
+                        opacity: preparingSeason ? 0.6 : 1,
+                      }}
+                    >
+                      {preparingSeason ? "Preparing..." : "Confirm & Execute"}
                     </button>
                   </div>
                 </div>
