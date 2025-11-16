@@ -10,10 +10,8 @@ import { firestore, auth, WEB_ENV } from "../firebaseConfig";
 import { doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 import {
   onAuthStateChanged,
-  signInWithPopup,
-  isSignInWithEmailLink,
-  sendSignInLinkToEmail,
-  signInWithEmailLink,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
 } from "firebase/auth";
 
@@ -26,6 +24,11 @@ export const Hero = () => {
   const [user, setUser] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [emailInput, setEmailInput] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authSuccess, setAuthSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [pendingRedirect, setPendingRedirect] = useState(null);
   const [adminEmail, setAdminEmail] = useState(null);
 
@@ -42,21 +45,6 @@ export const Hero = () => {
     });
     return () => unsub();
   }, [pendingRedirect]);
-
-  // Handle email-link completion (when user clicks the magic link)
-  useEffect(() => {
-    if (isSignInWithEmailLink(auth, window.location.href)) {
-      const stored = window.localStorage.getItem("emailForSignIn");
-      const email = stored || window.prompt("Enter your email to complete sign-in") || "";
-      if (email) {
-        signInWithEmailLink(auth, email, window.location.href)
-          .then(() => {
-            window.localStorage.removeItem("emailForSignIn");
-          })
-          .catch((e) => console.error("Email link sign-in failed", e));
-      }
-    }
-  }, []);
 
   const handleFAQClick = (index) => {
     setExpandedFAQ(expandedFAQ === index ? null : index);
@@ -206,23 +194,76 @@ export const Hero = () => {
     setShowAuthModal(false);
     setPendingRedirect(null);
     setEmailInput("");
+    setPasswordInput("");
+    setAuthError("");
+    setAuthSuccess("");
+    setIsLoading(false);
+    setShowForgotPassword(false);
   };
   
-  const handleSendEmailLink = async () => {
+  const handleEmailPasswordAuth = async () => {
+    if (!emailInput || !passwordInput) {
+      setAuthError("Please enter both email and password.");
+      return;
+    }
+
+    setIsLoading(true);
+    setAuthError("");
+    setAuthSuccess("");
+
     try {
-      if (!emailInput) {
-        alert("Please enter your email.");
-        return;
+      // Sign in existing user
+      await signInWithEmailAndPassword(auth, emailInput, passwordInput);
+      // Success - modal will close automatically via auth state change
+      closeAuthModal();
+    } catch (error) {
+      console.error("Auth error:", error);
+      let errorMessage = "Authentication failed. Please try again.";
+      
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "No account found with this email.";
+      } else if (error.code === "auth/wrong-password") {
+        errorMessage = "Incorrect password. Please try again.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Invalid email address.";
+      } else if (error.message) {
+        errorMessage = error.message;
       }
-      await sendSignInLinkToEmail(auth, emailInput, {
-        url: window.location.href,
-        handleCodeInApp: true,
-      });
-      window.localStorage.setItem("emailForSignIn", emailInput);
-      alert("Check your email for a sign-in link.");
-    } catch (e) {
-      console.error(e);
-      alert("Failed to send sign-in link.");
+      
+      setAuthError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!emailInput) {
+      setAuthError("Please enter your email address.");
+      return;
+    }
+
+    setIsLoading(true);
+    setAuthError("");
+    setAuthSuccess("");
+
+    try {
+      await sendPasswordResetEmail(auth, emailInput);
+      setAuthSuccess("Password reset email sent! Check your inbox for instructions.");
+    } catch (error) {
+      console.error("Password reset error:", error);
+      let errorMessage = "Failed to send password reset email. Please try again.";
+      
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "No account found with this email.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Invalid email address.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setAuthError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -263,6 +304,24 @@ export const Hero = () => {
     zIndex: 50,
   }}
 >
+
+    {/* GridBrain Tokens */}
+    <button
+    onClick={goToPurchase}
+    style={{
+      backgroundColor: "#7c3aed", // purple
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "5px 7px",
+      fontWeight: 700,
+      cursor: "pointer",
+      fontSize: 14,
+    }}
+  >
+    GRIDBRAIN TOKENS
+  </button>
+  
   {/* Sign In / Account */}
   {user ? (
     <button
@@ -272,9 +331,10 @@ export const Hero = () => {
         color: "#fff",
         border: "none",
         borderRadius: 8,
-        padding: "10px 14px",
+        padding: "5px 7px",
         fontWeight: 700,
         cursor: "pointer",
+        fontSize: 14,
       }}
       title={user.email || user.uid}
     >
@@ -288,30 +348,15 @@ export const Hero = () => {
         color: "#fff",
         border: "none",
         borderRadius: 8,
-        padding: "10px 14px",
+        padding: "5px 7px",
         fontWeight: 700,
         cursor: "pointer",
+        fontSize: 14,
       }}
     >
       SIGN IN
     </button>
   )}
-
-  {/* GridBrain Tokens */}
-  <button
-    onClick={goToPurchase}
-    style={{
-      backgroundColor: "#7c3aed", // purple
-      color: "#fff",
-      border: "none",
-      borderRadius: 8,
-      padding: "10px 14px",
-      fontWeight: 700,
-      cursor: "pointer",
-    }}
-  >
-    GRIDBRAIN TOKENS
-  </button>
 
   {/* Admin Dashboard - Only for specific email from Firestore */}
   {user?.email && adminEmail && user.email === adminEmail && (
@@ -322,9 +367,10 @@ export const Hero = () => {
         color: "#fff",
         border: "none",
         borderRadius: 8,
-        padding: "10px 14px",
+        padding: "5px 7px",
         fontWeight: 700,
         cursor: "pointer",
+        fontSize: 14,
       }}
     >
       ADMIN
@@ -335,7 +381,7 @@ export const Hero = () => {
         <img
           src={GridlockLogo}
           alt="Gridlock Logo"
-          style={{ width: 150, height: 150 }}
+          style={{ width: 150, height: 150, marginTop: screenWidth < 768 ? 50 : 0 }}
         />
       </header>
       <div
@@ -869,7 +915,7 @@ export const Hero = () => {
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h3 style={{ margin: 0 }}>Sign in</h3>
+        <h3 style={{ margin: 0 }}>{showForgotPassword ? "Reset Password" : "Sign in"}</h3>
         <button
           onClick={closeAuthModal}
           style={{
@@ -885,17 +931,32 @@ export const Hero = () => {
       </div>
 
       <p style={{ marginTop: 8, marginBottom: 16, color: "#bbb" }}>
-        Sign in with your Gridlock email to manage and purchase GridBrain tokens.
+        {showForgotPassword 
+          ? "Enter your email address and we'll send you a link to reset your password."
+          : "Sign in with your Gridlock email and password to manage and purchase GridBrain tokens."}
       </p>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 12 }}>
         <input
           type="email"
-          placeholder="Email for sign-in link"
+          placeholder="Email"
           value={emailInput}
-          onChange={(e) => setEmailInput(e.target.value)}
+          onChange={(e) => {
+            setEmailInput(e.target.value);
+            setAuthError("");
+            setAuthSuccess("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (showForgotPassword && emailInput) {
+                handleForgotPassword();
+              } else if (!showForgotPassword && emailInput && passwordInput) {
+                handleEmailPasswordAuth();
+              }
+            }
+          }}
           style={{
-            flex: 1,
+            width: "100%",
             borderRadius: 8,
             border: "1px solid #444",
             background: "#111",
@@ -904,26 +965,141 @@ export const Hero = () => {
             outline: "none",
           }}
         />
-        <button
-          onClick={handleSendEmailLink}
-          style={{
-            backgroundColor: "#7c3aed",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            padding: "10px 12px",
-            fontWeight: 700,
-            cursor: "pointer",
-            whiteSpace: "nowrap",
-          }}
-        >
-          Email link
-        </button>
+        {!showForgotPassword && (
+          <input
+            type="password"
+            placeholder="Password"
+            value={passwordInput}
+            onChange={(e) => {
+              setPasswordInput(e.target.value);
+              setAuthError("");
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && emailInput && passwordInput) {
+                handleEmailPasswordAuth();
+              }
+            }}
+            style={{
+              width: "100%",
+              borderRadius: 8,
+              border: "1px solid #444",
+              background: "#111",
+              color: "#fff",
+              padding: "10px 12px",
+              outline: "none",
+            }}
+          />
+        )}
       </div>
 
+      {!showForgotPassword && (
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "flex-end", 
+          marginBottom: 12,
+        }}>
+          <button
+            onClick={() => {
+              setShowForgotPassword(true);
+              setAuthError("");
+              setAuthSuccess("");
+            }}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#7c3aed",
+              cursor: "pointer",
+              textDecoration: "underline",
+              fontSize: 13,
+              padding: 0,
+            }}
+          >
+            Forgot password?
+          </button>
+        </div>
+      )}
+
+      {authError && (
+        <div style={{ 
+          marginBottom: 12, 
+          color: "#ff6b6b", 
+          fontSize: 13,
+          padding: "8px 12px",
+          background: "rgba(255, 107, 107, 0.1)",
+          borderRadius: 6,
+          border: "1px solid rgba(255, 107, 107, 0.3)",
+        }}>
+          {authError}
+        </div>
+      )}
+
+      {authSuccess && (
+        <div style={{ 
+          marginBottom: 12, 
+          color: "#8dd58d", 
+          fontSize: 13,
+          padding: "8px 12px",
+          background: "rgba(141, 213, 141, 0.1)",
+          borderRadius: 6,
+          border: "1px solid rgba(141, 213, 141, 0.3)",
+        }}>
+          {authSuccess}
+        </div>
+      )}
+
+      <button
+        onClick={showForgotPassword ? handleForgotPassword : handleEmailPasswordAuth}
+        disabled={isLoading || !emailInput || (!showForgotPassword && !passwordInput)}
+        style={{
+          width: "100%",
+          backgroundColor: isLoading || !emailInput || (!showForgotPassword && !passwordInput) ? "#555" : "#7c3aed",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8,
+          padding: "12px",
+          fontWeight: 700,
+          cursor: isLoading || !emailInput || (!showForgotPassword && !passwordInput) ? "not-allowed" : "pointer",
+          marginBottom: 12,
+          opacity: isLoading || !emailInput || (!showForgotPassword && !passwordInput) ? 0.6 : 1,
+        }}
+      >
+        {isLoading ? "Please wait..." : showForgotPassword ? "Send Reset Email" : "Sign In"}
+      </button>
+
+      {showForgotPassword && (
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center",
+          gap: 8,
+          fontSize: 13,
+          color: "#bbb",
+        }}>
+          <span>Remember your password?</span>
+          <button
+            onClick={() => {
+              setShowForgotPassword(false);
+              setAuthError("");
+              setAuthSuccess("");
+            }}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "#7c3aed",
+              cursor: "pointer",
+              textDecoration: "underline",
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            Sign In
+          </button>
+        </div>
+      )}
+
       {pendingRedirect && (
-        <div style={{ marginTop: 8, color: "#8dd58d", fontSize: 12 }}>
-          You’ll be redirected after sign-in…
+        <div style={{ marginTop: 12, color: "#8dd58d", fontSize: 12 }}>
+          You'll be redirected after sign-in…
         </div>
       )}
     </div>

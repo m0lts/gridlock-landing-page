@@ -68,6 +68,18 @@ export default function Admin() {
   const [preparingSeason, setPreparingSeason] = useState(false);
   const [seasonPrepResult, setSeasonPrepResult] = useState(null);
   const [showSeasonPrepConfirm, setShowSeasonPrepConfirm] = useState(false);
+  
+  // Notifications state
+  const [notifications, setNotifications] = useState(null);
+  const [loadingNotifications, setLoadingNotifications] = useState(true);
+  const [savingNotification, setSavingNotification] = useState(false);
+  const [editingNotification, setEditingNotification] = useState(null);
+  const [editingPageKey, setEditingPageKey] = useState(null);
+  
+  // App lockdown state (show_maintenance in metadata/diagnostics)
+  const [showMaintenance, setShowMaintenance] = useState(false);
+  const [loadingLockdown, setLoadingLockdown] = useState(true);
+  const [savingLockdown, setSavingLockdown] = useState(false);
 
   // Fetch admin credentials from Firestore metadata collection
   useEffect(() => {
@@ -285,6 +297,93 @@ export default function Admin() {
       newExpanded.add(eventId);
     }
     setExpandedDiagnostics(newExpanded);
+  };
+
+  // Notification handlers
+  const handleToggleNotification = async (pageKey) => {
+    if (!notifications) return;
+    
+    setSavingNotification(true);
+    try {
+      const notificationsRef = doc(firestore, "metadata", "notifications");
+      const updatedNotifications = {
+        ...notifications,
+        [pageKey]: {
+          ...notifications[pageKey],
+          active: !notifications[pageKey].active,
+        },
+      };
+      
+      await updateDoc(notificationsRef, {
+        [pageKey]: updatedNotifications[pageKey],
+      });
+      
+      setNotifications(updatedNotifications);
+    } catch (error) {
+      console.error("Error toggling notification:", error);
+      alert(`Failed to update notification: ${error.message}`);
+    } finally {
+      setSavingNotification(false);
+    }
+  };
+
+  const handleSaveNotification = async (pageKey) => {
+    if (!notifications || !editingNotification) return;
+    
+    setSavingNotification(true);
+    try {
+      const notificationsRef = doc(firestore, "metadata", "notifications");
+      const updatedNotifications = {
+        ...notifications,
+        [pageKey]: editingNotification,
+      };
+      
+      await updateDoc(notificationsRef, {
+        [pageKey]: editingNotification,
+      });
+      
+      setNotifications(updatedNotifications);
+      setEditingNotification(null);
+      setEditingPageKey(null);
+      alert("Notification updated successfully!");
+    } catch (error) {
+      console.error("Error saving notification:", error);
+      alert(`Failed to save notification: ${error.message}`);
+    } finally {
+      setSavingNotification(false);
+    }
+  };
+
+  const handleStartEditNotification = (pageKey) => {
+    if (!notifications) return;
+    setEditingNotification({ ...notifications[pageKey] });
+    setEditingPageKey(pageKey);
+  };
+
+  const handleCancelEditNotification = () => {
+    setEditingNotification(null);
+    setEditingPageKey(null);
+  };
+
+  // App lockdown handler (show_maintenance in metadata/diagnostics)
+  const handleToggleAppLockdown = async () => {
+    setSavingLockdown(true);
+    try {
+      const diagnosticsRef = doc(firestore, "metadata", "diagnostics");
+      const newValue = !showMaintenance;
+      
+      await updateDoc(diagnosticsRef, {
+        show_maintenance: newValue,
+      });
+      
+      setShowMaintenance(newValue);
+      alert(`Maintenance mode ${newValue ? "enabled" : "disabled"}`);
+    } catch (error) {
+      console.error("Error toggling app lockdown:", error);
+      alert(`Failed to update maintenance mode: ${error.message}`);
+    } finally {
+      setSavingLockdown(false);
+    }
   };
 
   const handleBugReportClick = (report) => {
@@ -1108,6 +1207,61 @@ export default function Admin() {
     };
 
     fetchF1DataForAdmin();
+  }, [isPasswordAuthenticated]);
+
+  // Fetch notifications
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!isPasswordAuthenticated) return;
+      
+      try {
+        const notificationsRef = doc(firestore, "metadata", "notifications");
+        const notificationsDoc = await getDoc(notificationsRef);
+        
+        if (notificationsDoc.exists()) {
+          setNotifications(notificationsDoc.data());
+        } else {
+          // Initialize with default structure if document doesn't exist
+          const defaultNotifications = {
+            account_page: { active: false, message: "", title: "" },
+            calendar_page: { active: false, message: "", title: "" },
+            home_page: { active: false, message: "", title: "" },
+            predictor_page: { active: false, message: "", title: "" },
+            standings_page: { active: false, message: "", title: "" },
+          };
+          setNotifications(defaultNotifications);
+        }
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+        setNotifications(null);
+      } finally {
+        setLoadingNotifications(false);
+      }
+    };
+
+    fetchNotifications();
+  }, [isPasswordAuthenticated]);
+
+  // Fetch app lockdown status (show_maintenance from metadata/diagnostics)
+  useEffect(() => {
+    const fetchAppLockdown = async () => {
+      if (!isPasswordAuthenticated) return;
+      
+      try {
+        const diagnosticsRef = doc(firestore, "metadata", "diagnostics");
+        const diagnosticsDoc = await getDoc(diagnosticsRef);
+        
+        if (diagnosticsDoc.exists()) {
+          setShowMaintenance(diagnosticsDoc.data().show_maintenance || false);
+        }
+      } catch (error) {
+        console.error("Error fetching app lockdown:", error);
+      } finally {
+        setLoadingLockdown(false);
+      }
+    };
+
+    fetchAppLockdown();
   }, [isPasswordAuthenticated]);
 
   // Show loading while checking auth or loading credentials
@@ -2592,6 +2746,256 @@ export default function Admin() {
             )}
           </div>
         )}
+
+        {/* Notifications Management Section */}
+        <div style={{
+          marginTop: 40,
+          padding: 30,
+          backgroundColor: "#1a1a1a",
+          borderRadius: 12,
+          border: "1px solid #444",
+        }}>
+          <h2 style={{ margin: "0 0 20px", color: "#7c3aed", fontSize: 18, fontWeight: 700 }}>
+            📢 NOTIFICATIONS MANAGEMENT
+          </h2>
+          
+          {loadingNotifications ? (
+            <div style={{ textAlign: "center", padding: 20 }}>
+              <p style={{ color: "#888" }}>Loading notifications...</p>
+            </div>
+          ) : !notifications ? (
+            <div style={{ padding: 20, backgroundColor: "#ff475720", border: "1px solid #ff4757", borderRadius: 8 }}>
+              <p style={{ color: "#ff4757", margin: 0 }}>Failed to load notifications</p>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {Object.entries(notifications).map(([pageKey, notification]) => {
+                const pageNames = {
+                  account_page: "Account Page",
+                  calendar_page: "Calendar Page",
+                  home_page: "Home Page",
+                  predictor_page: "Predictor Page",
+                  standings_page: "Standings Page",
+                };
+                const isEditingThis = editingPageKey === pageKey;
+                
+                return (
+                  <div
+                    key={pageKey}
+                    style={{
+                      padding: 20,
+                      backgroundColor: "#2a2a2a",
+                      borderRadius: 8,
+                      border: "1px solid #444",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 15 }}>
+                      <h3 style={{ margin: 0, color: "#fff", fontSize: 14, fontWeight: 600 }}>
+                        {pageNames[pageKey] || pageKey}
+                      </h3>
+                      <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                        <span style={{
+                          fontSize: 11,
+                          color: notification.active ? "#29F4D2" : "#888",
+                          fontWeight: 600,
+                        }}>
+                          {notification.active ? "● ACTIVE" : "○ INACTIVE"}
+                        </span>
+                        <button
+                          onClick={() => handleToggleNotification(pageKey)}
+                          disabled={savingNotification}
+                          style={{
+                            padding: "6px 12px",
+                            borderRadius: 6,
+                            backgroundColor: notification.active ? "#ff4757" : "#29F4D2",
+                            color: "#fff",
+                            border: "none",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: savingNotification ? "not-allowed" : "pointer",
+                            opacity: savingNotification ? 0.6 : 1,
+                          }}
+                        >
+                          {savingNotification ? "..." : notification.active ? "Deactivate" : "Activate"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {isEditingThis ? (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div>
+                          <label style={{ display: "block", color: "#888", fontSize: 11, marginBottom: 5 }}>
+                            Title
+                          </label>
+                          <input
+                            type="text"
+                            value={editingNotification.title || ""}
+                            onChange={(e) => setEditingNotification({ ...editingNotification, title: e.target.value })}
+                            style={{
+                              width: "100%",
+                              padding: 8,
+                              borderRadius: 6,
+                              border: "1px solid #555",
+                              backgroundColor: "#1a1a1a",
+                              color: "#fff",
+                              fontSize: 12,
+                              outline: "none",
+                            }}
+                            placeholder="Notification title"
+                          />
+                        </div>
+                        <div>
+                          <label style={{ display: "block", color: "#888", fontSize: 11, marginBottom: 5 }}>
+                            Message
+                          </label>
+                          <textarea
+                            value={editingNotification.message || ""}
+                            onChange={(e) => setEditingNotification({ ...editingNotification, message: e.target.value })}
+                            rows={4}
+                            style={{
+                              width: "100%",
+                              padding: 8,
+                              borderRadius: 6,
+                              border: "1px solid #555",
+                              backgroundColor: "#1a1a1a",
+                              color: "#fff",
+                              fontSize: 12,
+                              outline: "none",
+                              resize: "vertical",
+                              fontFamily: "inherit",
+                            }}
+                            placeholder="Notification message"
+                          />
+                        </div>
+                        <div style={{ display: "flex", gap: 10 }}>
+                          <button
+                            onClick={() => handleSaveNotification(pageKey)}
+                            disabled={savingNotification}
+                            style={{
+                              flex: 1,
+                              padding: "8px 16px",
+                              borderRadius: 6,
+                              backgroundColor: "#7c3aed",
+                              color: "#fff",
+                              border: "none",
+                              fontSize: 12,
+                              fontWeight: 600,
+                              cursor: savingNotification ? "not-allowed" : "pointer",
+                              opacity: savingNotification ? 0.6 : 1,
+                            }}
+                          >
+                            {savingNotification ? "Saving..." : "Save"}
+                          </button>
+                          <button
+                            onClick={handleCancelEditNotification}
+                            disabled={savingNotification}
+                            style={{
+                              flex: 1,
+                              padding: "8px 16px",
+                              borderRadius: 6,
+                              backgroundColor: "#444",
+                              color: "#fff",
+                              border: "none",
+                              fontSize: 12,
+                              fontWeight: 600,
+                              cursor: savingNotification ? "not-allowed" : "pointer",
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ marginBottom: 10 }}>
+                          <p style={{ margin: "0 0 5px", color: "#888", fontSize: 11 }}>Title:</p>
+                          <p style={{ margin: 0, color: "#fff", fontSize: 13, fontWeight: 500 }}>
+                            {notification.title || <span style={{ color: "#666", fontStyle: "italic" }}>No title</span>}
+                          </p>
+                        </div>
+                        <div style={{ marginBottom: 15 }}>
+                          <p style={{ margin: "0 0 5px", color: "#888", fontSize: 11 }}>Message:</p>
+                          <p style={{ margin: 0, color: "#bbb", fontSize: 12, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                            {notification.message || <span style={{ color: "#666", fontStyle: "italic" }}>No message</span>}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleStartEditNotification(pageKey)}
+                          style={{
+                            padding: "6px 12px",
+                            borderRadius: 6,
+                            backgroundColor: "#444",
+                            color: "#fff",
+                            border: "none",
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Edit
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* App Lockdown Section */}
+        <div style={{
+          marginTop: 40,
+          padding: 30,
+          backgroundColor: "#1a1a1a",
+          borderRadius: 12,
+          border: "1px solid #444",
+        }}>
+          <h2 style={{ margin: "0 0 20px", color: "#ff4757", fontSize: 18, fontWeight: 700 }}>
+            🔒 APP LOCKDOWN
+          </h2>
+          
+          {loadingLockdown ? (
+            <div style={{ textAlign: "center", padding: 20 }}>
+              <p style={{ color: "#888" }}>Loading lockdown status...</p>
+            </div>
+          ) : (
+            <div style={{
+              padding: 20,
+              backgroundColor: "#2a2a2a",
+              borderRadius: 8,
+              border: `1px solid ${showMaintenance ? "#ff4757" : "#444"}`,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <p style={{ margin: "0 0 5px", color: "#fff", fontSize: 14, fontWeight: 600 }}>
+                    Maintenance Mode Status
+                  </p>
+                  <p style={{ margin: 0, color: showMaintenance ? "#ff4757" : "#29F4D2", fontSize: 12 }}>
+                    {showMaintenance ? "🔒 MAINTENANCE MODE ON - App is in maintenance" : "🔓 NORMAL MODE - App is accessible"}
+                  </p>
+                </div>
+                <button
+                  onClick={handleToggleAppLockdown}
+                  disabled={savingLockdown}
+                  style={{
+                    padding: "10px 20px",
+                    borderRadius: 8,
+                    backgroundColor: showMaintenance ? "#ff4757" : "#29F4D2",
+                    color: "#fff",
+                    border: "none",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: savingLockdown ? "not-allowed" : "pointer",
+                    opacity: savingLockdown ? 0.6 : 1,
+                  }}
+                >
+                  {savingLockdown ? "Updating..." : showMaintenance ? "Disable Maintenance" : "Enable Maintenance"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
