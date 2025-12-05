@@ -181,7 +181,7 @@ export const Hero = () => {
     {
       question: "How to delete my account and all associated data?",
       answer:
-        "You can delete your account in the account section of the app. If this fails, please contact support by emailing us at admin@f1gridlock.com. We'll assist you with the deletion process.",
+        "You can delete your account in the account section of the app. If this fails, please contact support by emailing us at gridlock.contact@gmail.com. We'll assist you with the deletion process.",
     },
   ];
 
